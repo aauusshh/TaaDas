@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 1 — Engine core (Phase 0 done)
+Phase 2 — Table kit (Phase 1 done)
 
 ## Branch
 dev
@@ -13,13 +13,20 @@ dev
 ## Done
 - Phase 0: Vite+React+TS strict, eslint (bans Math.random in engine), prettier, vitest, folder tree, brand.ts, env.ts, featureFlags.ts, deploy workflow, felt placeholder. lint/typecheck/test/build pass.
 
+- Phase 1: engine core (rng, cards, deck, seats, events, types/GameDefinition, registry, sim CLI, LocalSession, highcard test game). 15 tests, sim 2000 games ok.
+
 ## Decisions and why
 - Newer toolchain than the spec assumed (Vite 8, TS 6, vitest 5, react-router 7, zod 4, motion 13). Used as installed.
 - vite-plugin-pwa installed but configured in Phase 11.
 - Build script runs tsc --noEmit before vite build.
 
+- Card ranks: 1=Ace..13=King, jokers suit J rank 0; ace-high helper rankAceHigh.
+- Events carry visibleTo; filterEventsDefault hides cards/secret from other seats.
+- GameDefinition.invariants() is an optional sim-only hook (card/chip conservation).
+- LocalSession bots act only after start(); thinkMs injectable (0 in tests).
+
 ## Next step
-Phase 1 per SPEC section 16.
+Phase 2 per SPEC section 16 (read SPEC 8, 9, 13).
 
 ## Questions for owner
 Answer under each question. Claude uses the default until answered.
