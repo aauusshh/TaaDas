@@ -1,19 +1,128 @@
 @import '@fontsource/mukta/400.css';
 @import '@fontsource/mukta/600.css';
+@import '@fontsource/mukta/700.css';
 @import '@fontsource/rozha-one/400.css';
 
 :root {
-  --felt: #14402f;
-  --felt-deep: #0d2c20;
-  --cream: #f3ead6;
-  --font-ui: 'Mukta', system-ui, sans-serif;
-  --font-display: 'Rozha One', serif;
+  --felt: #1f5a45;
+  --felt-deep: #123a2c;
+  --rim: #5a3a22;
+  --rim-dark: #3b2414;
+  --paper: #fbf8f1;
+  --paper-edge: #e4dccb;
+  --ink: #000000;
+  --suit-red: #c8102e;
+  --suit-blue: #1f5fbf;
+  --suit-green: #1e7b3c;
+  --brass: #b8893a;
+  --brass-light: #d8b26a;
+  --brass-dark: #7d5a1f;
+  --panel: #173f31;
+  --panel-raised: #1d4b3b;
+  --panel-text: #f4f1e8;
+  --panel-muted: #a9bfb2;
+  --danger: #e0614f;
+  --ok: #7fc48a;
+
+  --font-ui: 'Mukta', 'Noto Sans Devanagari', system-ui, sans-serif;
+  --font-display: 'Rozha One', 'Noto Serif Devanagari', serif;
+
+  --card-w: 64px;
+  --card-ratio: 0.7159; /* 63:88 */
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --anim-speed: 1;
+}
+
+/* Themes: the table surface and rim. Classic is the default. */
+:root[data-theme='dhaka'] {
+  --felt: #6b1e2a;
+  --felt-deep: #44111b;
+  --rim: #3a1a14;
+  --rim-dark: #240f0a;
+  --panel: #4a1520;
+  --panel-raised: #5a1c29;
+  --panel-muted: #cfa9ae;
+}
+:root[data-theme='sal'] {
+  --felt: #8a6038;
+  --felt-deep: #5f3f22;
+  --rim: #3a2412;
+  --rim-dark: #25160a;
+  --panel: #3a2a1c;
+  --panel-raised: #47341f;
+  --panel-muted: #c2ad94;
+}
+:root[data-theme='tihar'] {
+  --felt: #1e2140;
+  --felt-deep: #11132b;
+  --rim: #2a2230;
+  --rim-dark: #181320;
+  --panel: #181a36;
+  --panel-raised: #202349;
+  --panel-muted: #a5a9cf;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 html,
-body {
+body,
+#root {
+  height: 100%;
   margin: 0;
-  background: radial-gradient(ellipse at 50% 30%, var(--felt), var(--felt-deep));
-  color: var(--cream);
+}
+
+body {
+  background: var(--felt-deep);
+  color: var(--panel-text);
   font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.35;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--brass-light);
+  outline-offset: 2px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+:root[data-reduce-motion='true'] * {
+  animation-duration: 0.01ms !important;
+  transition-duration: 0.01ms !important;
 }

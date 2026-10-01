@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 2 — Table kit (Phase 1 done)
+Phase 3 — Call Break (Phase 2 done)
 
 ## Branch
 dev
@@ -15,6 +15,8 @@ dev
 
 - Phase 1: engine core (rng, cards, deck, seats, events, types/GameDefinition, registry, sim CLI, LocalSession, highcard test game). 15 tests, sim 2000 games ok.
 
+- Phase 2: tokens + 4 themes, fonts, SVG card faces/backs/joker, RangiCard, Hand (fan, drag, keyboard), Piles, Seat+TurnRing, ChipStack, 16 avatars, anim queue + FlightLayer (WAAPI), SoundManager with synth fallback, settings/profile stores, i18n en/ne, Home, SettingsSheet, dev kit /dev/kit. Screenshots reviewed (docs/design-notes.md).
+
 ## Decisions and why
 - Newer toolchain than the spec assumed (Vite 8, TS 6, vitest 5, react-router 7, zod 4, motion 13). Used as installed.
 - vite-plugin-pwa installed but configured in Phase 11.
@@ -25,8 +27,13 @@ dev
 - GameDefinition.invariants() is an optional sim-only hook (card/chip conservation).
 - LocalSession bots act only after start(); thinkMs injectable (0 in tests).
 
+- Flights use WAAPI on fixed-position clones located via anchor registry (useAnchor keys: deck, discard, seat:N, hand:N, card:ID).
+- No sound files in public/sounds yet: synthesized fallback is used until the owner adds files (mp3 named shuffle,deal,place,slide,flip,chip,chips,rattle,bowl,tick,win,tap).
+- Nepali strings are my draft; owner reviews in Phase 11 step.
+- Dev server was left running in background for screenshots; stop it with the final phase.
+
 ## Next step
-Phase 2 per SPEC section 16 (read SPEC 8, 9, 13).
+Phase 3 per SPEC section 16 (read rules/callbreak, SPEC 10, 11).
 
 ## Questions for owner
 Answer under each question. Claude uses the default until answered.

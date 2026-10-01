@@ -1,0 +1,73 @@
+.page {
+  min-height: 100dvh;
+  padding: calc(12px + var(--safe-top)) 12px 60px;
+  background: var(--felt-deep);
+}
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-bottom: 8px;
+}
+.head h1 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--brass-light);
+}
+.back {
+  color: var(--panel-text);
+  font-weight: 600;
+  padding: 10px 6px;
+}
+
+.section {
+  margin: 18px 0;
+}
+.section h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--brass-light);
+  border-bottom: 1px solid rgb(244 241 232 / 0.18);
+  padding-bottom: 4px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  gap: 8px;
+}
+.cardCell {
+  filter: none;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+  border-radius: 5.7% / 4.1%;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.felt {
+  background: radial-gradient(ellipse at 50% 30%, var(--felt), var(--felt-deep) 90%);
+  border: 6px solid var(--rim);
+  border-radius: 16px;
+  padding: 10px 6px 4px;
+}
+.seats {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  gap: 4px;
+}
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 18px;
+  padding: 14px 0 30px;
+}
