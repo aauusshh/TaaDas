@@ -34,3 +34,8 @@
 - Online lobby: big room code in the display face, QR, Share/Copy link, seats as rows (host controls inline), ready states with connection dots.
 - Lobby rows for empty seats are tall; compress in the Phase 11 polish pass.
 - Reactions: 6 phrases + 6 emoji (emoji only here), bubble appears over the sender's seat.
+
+## Phase 6 self-review (Rangi, 360x740 and 740x360)
+- Cards: full-bleed color, rounded-square window (not an oval), Rozha numeral, faint dhaka diamonds at about 8%, corner symbols (sun, flower, mountain, leaf), raised-palm Skip, mandala Wild. Deck pile has stacked paper edges.
+- Generic: the table is clean but plain; opponents are just avatars and counts.
+- Fixed: in landscape the opponent counts hid behind the draw pile; opponents now use a row layout and the Draw tag sits below the pile.

@@ -160,7 +160,7 @@ const ART: Record<string, () => JSX.Element> = {
   rangi: () => (
     <div style={{ position: 'relative', width: 150, height: 112 }}>
       {[
-        { c: 'neel' as const, v: 7, x: 0, r: -10 },
+        { c: 'sky' as const, v: 7, x: 0, r: -10 },
         { c: 'sindoor' as const, v: 'skip' as const, x: 36, r: 0 },
         { c: 'marigold' as const, v: 4, x: 72, r: 11 },
       ].map(({ c, v, x, r }, i) => (

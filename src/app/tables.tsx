@@ -6,6 +6,7 @@ import { useT } from '../i18n/t';
 /** One lazy table component per game. Add new games here. */
 export const tables: Partial<Record<GameId, ComponentType<TableProps>>> = {
   callbreak: lazy(() => import('../ui/games/callbreak/CallBreakTable')),
+  rangi: lazy(() => import('../ui/games/rangi/RangiTable')),
 };
 
 export function Loading() {

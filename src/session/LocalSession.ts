@@ -228,7 +228,7 @@ export class LocalSession implements Session {
             this.botMove(seat);
           }, delay),
         );
-      } else if (this.timerMs > 0 && playPhase) {
+      } else if (this.timerMs > 0 && playPhase && seat === actors[0]) {
         this.armHumanTimer(seat);
       }
     }

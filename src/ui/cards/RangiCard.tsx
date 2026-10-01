@@ -1,20 +1,21 @@
 import { memo } from 'react';
 import { ID } from './art/SvgDefs';
 
-export type RangiColor = 'marigold' | 'sindoor' | 'neel' | 'pipal';
+export type RangiColor = 'sindoor' | 'marigold' | 'sky' | 'leaf';
 export type RangiValue = number | 'skip' | 'reverse' | 'draw2' | 'wild' | 'wild4';
 
+export const RANGI_COLORS: readonly RangiColor[] = ['sindoor', 'marigold', 'sky', 'leaf'];
 export const RANGI_HEX: Record<RangiColor, string> = {
-  marigold: '#e39b12',
-  sindoor: '#c93a22',
-  neel: '#2d58a8',
-  pipal: '#2e7d4b',
+  sindoor: '#d2232a',
+  marigold: '#f2a900',
+  sky: '#1c6dd0',
+  leaf: '#2e9a4f',
 };
 const PAPER = '#fbf8f1';
-const ORDER: RangiColor[] = ['marigold', 'sindoor', 'neel', 'pipal'];
+const BLACK = '#1b1b21';
 
-/** Corner shapes so color is never the only signal. */
-function Shape({
+/** Corner symbols (sun, flower, mountain, leaf) so color is never the only signal. */
+export function RangiSymbol({
   color,
   x,
   y,
@@ -28,29 +29,102 @@ function Shape({
   fill: string;
 }) {
   const h = s / 2;
-  if (color === 'marigold') return <circle cx={x} cy={y} r={h} fill={fill} />;
-  if (color === 'sindoor')
-    return <path d={`M${x} ${y - h}L${x + h} ${y + h}H${x - h}z`} fill={fill} />;
-  if (color === 'neel')
+  if (color === 'sindoor') {
     return (
-      <rect x={x - h * 0.85} y={y - h * 0.85} width={s * 0.85} height={s * 0.85} fill={fill} />
+      <g fill={fill} stroke={fill} strokeWidth={s * 0.1} strokeLinecap="round">
+        <circle cx={x} cy={y} r={h * 0.52} stroke="none" />
+        {Array.from({ length: 8 }, (_, i) => {
+          const a = (i * Math.PI) / 4;
+          return (
+            <line
+              key={i}
+              x1={x + Math.cos(a) * h * 0.72}
+              y1={y + Math.sin(a) * h * 0.72}
+              x2={x + Math.cos(a) * h}
+              y2={y + Math.sin(a) * h}
+            />
+          );
+        })}
+      </g>
     );
+  }
+  if (color === 'marigold') {
+    return (
+      <g fill={fill}>
+        {Array.from({ length: 5 }, (_, i) => {
+          const a = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+          return (
+            <circle
+              key={i}
+              cx={x + Math.cos(a) * h * 0.55}
+              cy={y + Math.sin(a) * h * 0.55}
+              r={h * 0.45}
+            />
+          );
+        })}
+      </g>
+    );
+  }
+  if (color === 'sky') {
+    return (
+      <path
+        d={`M${x - h} ${y + h * 0.8}L${x - h * 0.25} ${y - h * 0.6}L${x + h * 0.15} ${y + h * 0.05}L${x + h * 0.5} ${y - h * 0.3}L${x + h} ${y + h * 0.8}z`}
+        fill={fill}
+      />
+    );
+  }
   return (
-    <path
-      d={`M${x} ${y - h}C${x + h * 1.2} ${y - h * 0.3} ${x + h * 1.2} ${y + h * 0.4} ${x} ${y + h}C${x - h * 1.2} ${y + h * 0.4} ${x - h * 1.2} ${y - h * 0.3} ${x} ${y - h}z`}
-      fill={fill}
-    />
+    <g>
+      <path
+        d={`M${x - h * 0.85} ${y + h * 0.85}C${x - h * 1.05} ${y - h * 0.3} ${x - h * 0.2} ${y - h} ${x + h * 0.95} ${y - h * 0.9}C${x + h} ${y + h * 0.2} ${x + h * 0.3} ${y + h * 0.95} ${x - h * 0.85} ${y + h * 0.85}z`}
+        fill={fill}
+      />
+    </g>
   );
 }
 
-function Glyph({ value, color, ink }: { value: RangiValue; color: string; ink: string }) {
+/** Raised open palm: the Skip icon. */
+function Palm({ fill }: { fill: string }) {
+  return (
+    <g fill={fill}>
+      <rect x="24.6" y="30" width="3.2" height="17" rx="1.6" />
+      <rect x="28.4" y="26.5" width="3.2" height="20.5" rx="1.6" />
+      <rect x="32.2" y="28" width="3.2" height="19" rx="1.6" />
+      <rect x="36" y="32" width="3" height="15" rx="1.5" />
+      <path d="M24.6 44h14.4v6.5c0 4.5-3.2 8-7.2 8s-7.2-3.5-7.2-8z" />
+      <rect x="19.4" y="42" width="3.4" height="12" rx="1.7" transform="rotate(-38 21 48)" />
+    </g>
+  );
+}
+
+function Mandala({ r = 12 }: { r?: number }) {
+  return (
+    <g>
+      {RANGI_COLORS.map((c, i) => (
+        <ellipse
+          key={c}
+          cx="31.5"
+          cy={44 - r * 0.62}
+          rx={r * 0.46}
+          ry={r * 0.78}
+          fill={RANGI_HEX[c]}
+          transform={`rotate(${i * 90} 31.5 44)`}
+        />
+      ))}
+      <circle cx="31.5" cy="44" r={r * 0.3} fill={PAPER} />
+      <circle cx="31.5" cy="44" r={r * 0.3} fill="none" stroke={BLACK} strokeWidth="0.6" />
+    </g>
+  );
+}
+
+function Glyph({ value, color }: { value: RangiValue; color: string }) {
   if (typeof value === 'number') {
     return (
       <text
         x="31.5"
-        y="56"
+        y="55.2"
         textAnchor="middle"
-        fontSize="30"
+        fontSize="31"
         fill={color}
         fontFamily="var(--font-display)"
       >
@@ -58,14 +132,7 @@ function Glyph({ value, color, ink }: { value: RangiValue; color: string; ink: s
       </text>
     );
   }
-  if (value === 'skip') {
-    return (
-      <g fill="none" stroke={color} strokeWidth="4.2" strokeLinecap="round">
-        <circle cx="31.5" cy="46" r="11" />
-        <line x1="23.5" y1="54" x2="39.5" y2="38" />
-      </g>
-    );
-  }
+  if (value === 'skip') return <Palm fill={color} />;
   if (value === 'reverse') {
     return (
       <g fill="none" stroke={color} strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round">
@@ -80,30 +147,30 @@ function Glyph({ value, color, ink }: { value: RangiValue; color: string; ink: s
     return (
       <g>
         <rect
-          x="21"
-          y="36"
+          x="22"
+          y="31"
           width="12"
           height="17"
-          rx="1.6"
+          rx="1.8"
           fill={color}
-          transform="rotate(-12 27 44)"
+          transform="rotate(-12 28 40)"
         />
         <rect
-          x="30"
-          y="38"
+          x="29"
+          y="33"
           width="12"
           height="17"
-          rx="1.6"
-          fill={ink}
+          rx="1.8"
+          fill={color}
           stroke={PAPER}
-          strokeWidth="1"
-          transform="rotate(10 36 46)"
+          strokeWidth="1.2"
+          transform="rotate(9 35 42)"
         />
         <text
           x="31.5"
-          y="66"
+          y="63"
           textAnchor="middle"
-          fontSize="11"
+          fontSize="12"
           fontWeight="700"
           fill={color}
           fontFamily="var(--font-ui)"
@@ -113,35 +180,19 @@ function Glyph({ value, color, ink }: { value: RangiValue; color: string; ink: s
       </g>
     );
   }
-  const quarters = (
-    <g>
-      {ORDER.map((c, i) => (
-        <path
-          key={c}
-          d={
-            [
-              'M31.5 46V32a14 14 0 0 1 14 14z',
-              'M31.5 46H45.5a14 14 0 0 1-14 14z',
-              'M31.5 46V60a14 14 0 0 1-14-14z',
-              'M31.5 46H17.5a14 14 0 0 1 14-14z',
-            ][i]
-          }
-          fill={RANGI_HEX[c]}
-        />
-      ))}
-    </g>
-  );
-  if (value === 'wild') return quarters;
+  if (value === 'wild') return <Mandala r={13} />;
   return (
     <g>
-      <g transform="translate(0 -3)">{quarters}</g>
+      <g transform="translate(0 -4) scale(1)">
+        <Mandala r={11} />
+      </g>
       <text
         x="31.5"
-        y="68"
+        y="64"
         textAnchor="middle"
         fontSize="12"
         fontWeight="700"
-        fill={ink}
+        fill={BLACK}
         fontFamily="var(--font-ui)"
       >
         +4
@@ -167,7 +218,7 @@ const cornerText = (v: RangiValue) =>
     : { skip: 'S', reverse: 'R', draw2: '+2', wild: 'W', wild4: '+4' }[v];
 
 export interface RangiCardProps {
-  /** undefined for wild cards that haven't been given a color */
+  /** wild cards have no color */
   color?: RangiColor;
   value: RangiValue;
   className?: string;
@@ -175,22 +226,24 @@ export interface RangiCardProps {
 }
 
 function RangiCardBase({ color, value, className, style }: RangiCardProps) {
-  const field = color ? RANGI_HEX[color] : '#26262e';
-  const ink = color ? field : '#26262e';
-  const isWild = value === 'wild' || value === 'wild4';
+  const field = color ? RANGI_HEX[color] : BLACK;
   const corner = (
     <g fill={PAPER} aria-hidden="true">
       <text
         x="8.4"
-        y="14.2"
+        y="14"
         textAnchor="middle"
-        fontSize={cornerText(value).length > 1 ? 9.5 : 12}
+        fontSize={cornerText(value).length > 1 ? 9 : 11.5}
         fontWeight="700"
         fontFamily="var(--font-ui)"
       >
         {cornerText(value)}
       </text>
-      {color && <Shape color={color} x={8.4} y={21} s={5.6} fill={PAPER} />}
+      {color ? (
+        <RangiSymbol color={color} x={8.4} y={21.4} s={6.4} fill={PAPER} />
+      ) : (
+        <circle cx="8.4" cy="21" r="2.6" fill={PAPER} opacity="0.9" />
+      )}
     </g>
   );
   return (
@@ -202,27 +255,23 @@ function RangiCardBase({ color, value, className, style }: RangiCardProps) {
       aria-label={`${color ? color + ' ' : ''}${label(value)}`}
     >
       <rect width="63" height="88" rx="4" fill={PAPER} />
-      <rect x="2.6" y="2.6" width="57.8" height="82.8" rx="2.6" fill={field} />
-      <rect
-        x="2.6"
-        y="2.6"
-        width="57.8"
-        height="82.8"
-        rx="2.6"
-        fill={`url(#${ID.grain})`}
-        opacity="0.5"
-      />
+      <rect x="2.6" y="2.6" width="57.8" height="82.8" rx="2.8" fill={field} />
+      <rect x="2.6" y="2.6" width="57.8" height="82.8" rx="2.8" fill={`url(#${ID.rtex})`} />
       {corner}
       <g transform="rotate(180 31.5 44)">{corner}</g>
-      <path d="M13 72V45a18.5 18.5 0 0 1 37 0v27z" fill={PAPER} />
-      <path
-        d="M16.5 72V45a15 15 0 0 1 30 0v27"
+      <rect x="12.5" y="21" width="38" height="46" rx="7" fill={PAPER} />
+      <rect
+        x="14.5"
+        y="23"
+        width="34"
+        height="42"
+        rx="5"
         fill="none"
         stroke={field}
-        strokeWidth="0.7"
-        opacity="0.5"
+        strokeWidth="0.6"
+        opacity="0.45"
       />
-      <Glyph value={value} color={isWild ? ink : field} ink={isWild ? '#26262e' : field} />
+      <Glyph value={value} color={color ? field : BLACK} />
       <rect
         x="0.25"
         y="0.25"
@@ -254,18 +303,54 @@ export function RangiBack({
       aria-label="Rangi card back"
     >
       <rect width="63" height="88" rx="4" fill={PAPER} />
-      <rect x="2.6" y="2.6" width="57.8" height="82.8" rx="2.6" fill="#26262e" />
-      <path d="M11 74V46a20.5 20.5 0 0 1 41 0v28z" fill="none" stroke={PAPER} strokeWidth="1.2" />
-      {ORDER.map((c, i) => (
-        <circle
+      <rect x="2.6" y="2.6" width="57.8" height="82.8" rx="2.8" fill={BLACK} />
+      <rect
+        x="6"
+        y="6"
+        width="51"
+        height="76"
+        rx="2"
+        fill="none"
+        stroke={PAPER}
+        strokeWidth="0.5"
+        opacity="0.5"
+      />
+      {RANGI_COLORS.map((c, i) => (
+        <line
           key={c}
-          cx={22 + (i % 2) * 19}
-          cy={40 + Math.floor(i / 2) * 13}
-          r="5.4"
-          fill={RANGI_HEX[c]}
+          x1={8 + i * 12.75}
+          y1="9"
+          x2={8 + (i + 1) * 12.75}
+          y2="9"
+          stroke={RANGI_HEX[c]}
+          strokeWidth="1.4"
+          strokeLinecap="round"
         />
       ))}
-      <use href={`#${ID.mark}`} x="25" y="9" width="13" height="13" color={PAPER} />
+      {RANGI_COLORS.map((c, i) => (
+        <line
+          key={c}
+          x1={8 + i * 12.75}
+          y1="79"
+          x2={8 + (i + 1) * 12.75}
+          y2="79"
+          stroke={RANGI_HEX[c]}
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
+      ))}
+      <text
+        x="31.5"
+        y="47"
+        textAnchor="middle"
+        fontSize="13"
+        fill={PAPER}
+        fontFamily="var(--font-display)"
+        transform="rotate(-90 31.5 44)"
+        letterSpacing="1"
+      >
+        Rangi
+      </text>
       <rect
         x="0.25"
         y="0.25"

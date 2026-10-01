@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 6 — Rangi (Phase 5 done)
+Phase 7 — Langur Burja (Phase 6 done)
 
 ## Branch
 dev
@@ -22,6 +22,8 @@ dev
 - Phase 4: setup sheet from configSchema (modes bots/same device, player count, names, bot level, presets + saved house rules, timer, hints), turn timer with Auto seat after 2 timeouts, pass-and-play cover and face-down hands, profile screen + stats, save/resume with Continue game, haptics helper. 36 tests. e2e/local.mjs verified setup, cover, resume.
 
 - Phase 5: net layer (zod protocol, Transport interface, in-memory + PeerJS transports, room codes), HostSession/ClientSession, lobby (QR, share, seats, bots, kick, lock, timer, rules), join screen, reconnect with token, Auto seats, host resume, wake lock, reactions, connection dots. 46 tests incl. leak check over the wire. e2e/online.mjs (two browsers via PeerJS cloud) passes: 3 plays each, no hidden card leaked, same seat after reload.
+
+- Phase 6: Rangi engine (108-card deck, legality, challenge, Ek/Caught window, stacking, seven-zero, jump-in, draw-until-play, must-play, scoring), bots easy/medium/hard, RangiCard art to the rules file (sindoor/marigold/sky/leaf, symbols, palm, mandala), table UI with color/swap pickers and challenge dialog, rules sheet. 26 Rangi tests, sim 2000 ok, full round auto-played at 360x740 and 740x360.
 
 ## Decisions and why
 - Newer toolchain than the spec assumed (Vite 8, TS 6, vitest 5, react-router 7, zod 4, motion 13). Used as installed.
@@ -52,8 +54,13 @@ dev
 - Spectator view uses seat 0 layout (status text may say Your turn when seat 0 acts); polish later.
 - Dev-only hooks window.__host/__client/__netLog exist for the e2e test (DEV builds only).
 
+- Bots never jump in and only call Caught when they are the next player (keeps non-turn bot actors out of the engine).
+- Easy bots forget Ek 30% of the time, medium 5%, hard never (engine decides at play time).
+- Progressive drawing in the rules file is treated as the stacking option (owner question added).
+- LocalSession arms the turn timer only for the first actor in currentActors.
+
 ## Next step
-Phase 6 per SPEC section 16 (rules/rangi): deck art is done (RangiCard); build engine, bots, house rules, UI, all modes.
+Phase 7 per SPEC section 16 (rules/langur-burja): dice, bowl, mat, betting UI, banker logic, single/local/online.
 
 ## Questions for owner
 Answer under each question. Claude uses the default until answered.
@@ -66,3 +73,5 @@ Answer under each question. Claude uses the default until answered.
 - Jut Patti: does a pair need the same color too (default no)? Joker = one rank above the flipped card (default yes)?
 - Kitti: win = any 2 of 3 shows (default) or 2 in a row?
 - Langur Burja: payout table (default: 1 match pays 1x, 2 pays 2x, ... 6 pays 6x)? Nepali names for the crown and flag faces?
+- Rangi: I read "Progressive drawing" as the same thing as the stacking option (whoever cannot stack takes the whole pile). Is there a separate rule in your family?
+- Rangi: bots never jump in out of turn. Fine, or should hard bots try?

@@ -1,13 +1,19 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { motion } from 'motion/react';
+import type { ReactNode } from 'react';
 import type { Card } from '../../engine/core/cards';
+import type { GameCard } from '../../engine/core/events';
 import { CardBack, CardFace } from '../cards/CardFace';
 import { useAnchor } from '../anim/anchors';
 import { effectiveReduceMotion } from '../../storage/settings';
 import s from './Hand.module.css';
 
 export interface HandProps {
-  cards: Card[];
+  cards: GameCard[];
+  /** how to draw a card; standard playing cards by default */
+  render?: (card: GameCard) => ReactNode;
+  /** the card back used in face-down mode */
+  back?: ReactNode;
   /** card width in px */
   cardWidth: number;
   selectedId?: number | null;
@@ -29,6 +35,7 @@ const SPREAD_DEG = 12;
 
 function HandCard({
   card,
+  content,
   x,
   y,
   rot,
@@ -41,13 +48,12 @@ function HandCard({
   onDrop,
   disabled,
   hint,
-  faceDown,
   focusable,
 }: {
   hint: boolean;
-  faceDown: boolean;
   focusable: boolean;
-  card: Card;
+  card: GameCard;
+  content: ReactNode;
   x: number;
   y: number;
   rot: number;
@@ -85,13 +91,15 @@ function HandCard({
       onClick={onTap}
       tabIndex={focusable ? 0 : -1}
     >
-      {faceDown ? <CardBack /> : <CardFace card={card} />}
+      {content}
     </motion.button>
   );
 }
 
 export function Hand({
   cards,
+  render,
+  back,
   cardWidth,
   selectedId = null,
   playableIds = null,
@@ -172,6 +180,9 @@ export function Hand({
           <HandCard
             key={c.id}
             card={c}
+            content={
+              faceDown ? (back ?? <CardBack />) : render ? render(c) : <CardFace card={c as Card} />
+            }
             x={x}
             y={y + 16}
             rot={rot}
@@ -181,7 +192,6 @@ export function Hand({
             dim={!!playableIds && !playable}
             selected={selected}
             hint={!faceDown && c.id === hintId}
-            faceDown={faceDown}
             focusable={selected || (selectedId === null && i === 0)}
             disabled={disabled}
             onTap={() => {

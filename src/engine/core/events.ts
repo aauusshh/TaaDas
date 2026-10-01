@@ -1,4 +1,7 @@
-import type { Card } from './cards';
+/** Any physical card: standard cards, Rangi cards, anything with a unique id. */
+export interface GameCard {
+  id: number;
+}
 
 export type ZoneKind =
   | 'deck'
@@ -27,7 +30,7 @@ export interface Zone {
 export interface GameEvent {
   type: string;
   seat?: number;
-  cards?: Card[];
+  cards?: GameCard[];
   count?: number;
   from?: Zone;
   to?: Zone;
@@ -53,7 +56,7 @@ export function filterEventsDefault(events: GameEvent[], seat: ViewerSeat): Game
 }
 
 export const ev = {
-  deal: (seat: number, cards: Card[], from: Zone = { kind: 'deck' }): GameEvent => ({
+  deal: (seat: number, cards: GameCard[], from: Zone = { kind: 'deck' }): GameEvent => ({
     type: 'deal',
     seat,
     cards,
@@ -61,7 +64,13 @@ export const ev = {
     to: { kind: 'hand', seat },
     visibleTo: [seat],
   }),
-  move: (cards: Card[], from: Zone, to: Zone, seat?: number, visibleTo?: number[]): GameEvent => ({
+  move: (
+    cards: GameCard[],
+    from: Zone,
+    to: Zone,
+    seat?: number,
+    visibleTo?: number[],
+  ): GameEvent => ({
     type: 'move',
     seat,
     cards,

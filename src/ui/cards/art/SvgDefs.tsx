@@ -3,6 +3,7 @@
 
 export const ID = {
   grain: 'ch-grain',
+  rtex: 'ch-rtex',
   pip: (s: string) => `ch-pip-${s}`,
   crown: 'ch-crown',
   lotus: 'ch-lotus',
@@ -38,6 +39,18 @@ export function SvgDefs() {
           <circle cx="6" cy="8" r="0.55" fill="#6b5a3a" opacity="0.07" />
           <circle cx="12" cy="10" r="0.4" fill="#6b5a3a" opacity="0.06" />
           <circle cx="3.5" cy="12.5" r="0.45" fill="#6b5a3a" opacity="0.06" />
+        </pattern>
+
+        {/* faint dhaka-style diamonds on Rangi cards, about 8% */}
+        <pattern id={ID.rtex} width="9" height="9" patternUnits="userSpaceOnUse">
+          <path
+            d="M4.5 0.8 8.2 4.5 4.5 8.2 0.8 4.5z"
+            fill="none"
+            stroke="#ffffff"
+            strokeWidth="0.6"
+            opacity="0.09"
+          />
+          <path d="M4.5 3.2 5.8 4.5 4.5 5.8 3.2 4.5z" fill="#ffffff" opacity="0.08" />
         </pattern>
 
         {/* suit pips, 100x100 box */}

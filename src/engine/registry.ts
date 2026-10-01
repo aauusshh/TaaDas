@@ -6,6 +6,7 @@ type Loader = () => Promise<AnyGame>;
 const loaders: Partial<Record<GameId, Loader>> = {
   highcard: async () => (await import('./games/highcard')).highCard,
   callbreak: async () => (await import('./games/callbreak')).callBreak,
+  rangi: async () => (await import('./games/rangi')).rangi,
 };
 
 export const registerGame = (id: GameId, loader: Loader) => {

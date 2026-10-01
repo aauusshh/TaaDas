@@ -20,7 +20,7 @@ import { SettingsSheet } from './SettingsSheet';
 import s from './DevKit.module.css';
 
 const queue = new AnimQueue();
-const RANGI_COLORS: RangiColor[] = ['marigold', 'sindoor', 'neel', 'pipal'];
+const RANGI_COLORS: RangiColor[] = ['marigold', 'sindoor', 'sky', 'leaf'];
 const RANGI_VALUES: RangiValue[] = [0, 3, 7, 9, 'skip', 'reverse', 'draw2', 'wild', 'wild4'];
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -171,9 +171,6 @@ export function DevKit() {
           </div>
           <div className={s.cardCell}>
             <RangiCard value="wild4" />
-          </div>
-          <div className={s.cardCell}>
-            <RangiCard color="neel" value="wild4" />
           </div>
         </div>
       </Section>

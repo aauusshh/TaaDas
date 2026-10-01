@@ -100,7 +100,7 @@ export default function CallBreakTable({
         setDeal({ mine: [], counts: [0, 0, 0, 0] });
         sound.play('shuffle');
         await wait(dur(500));
-        const mine = deals.find((e) => e.seat === mySeat)?.cards ?? [];
+        const mine = (deals.find((e) => e.seat === mySeat)?.cards ?? []) as Card[];
         const per = 13;
         const order: number[] = [];
         for (let i = 0, sx = nextSeat(next.dealer, 4, next.config.direction); i < 4; i++) {
@@ -137,7 +137,7 @@ export default function CallBreakTable({
       }
       for (const e of events) {
         if (e.type === 'move' && e.to?.kind === 'trick' && e.cards && e.seat !== undefined) {
-          const card = e.cards[0];
+          const card = e.cards[0] as Card;
           const seat = e.seat;
           const mineCard = seat === mySeat;
           sound.play('slide');
