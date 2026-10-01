@@ -8,6 +8,9 @@ const loaders: Partial<Record<GameId, Loader>> = {
   callbreak: async () => (await import('./games/callbreak')).callBreak,
   rangi: async () => (await import('./games/rangi')).rangi,
   dhumbal: async () => (await import('./games/dhumbal')).dhumbal,
+  teenpatti: async () => (await import('./games/teenpatti')).teenPatti,
+  kitti: async () => (await import('./games/kitti')).kitti,
+  inbetween: async () => (await import('./games/inbetween')).inBetween,
   jutpatti: async () => (await import('./games/jutpatti')).jutPatti,
   langurburja: async () => (await import('./games/langurburja')).langurBurja,
 };
