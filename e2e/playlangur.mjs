@@ -56,6 +56,13 @@ while (Date.now() - t0 < 200000) {
     if (await lock.isEnabled()) await lock.click();
   }
 }
-console.log(JSON.stringify({ finished, rounds, seconds: Math.round((Date.now() - t0) / 1000), errors: errors.slice(0, 5) }));
+console.log(
+  JSON.stringify({
+    finished,
+    rounds,
+    seconds: Math.round((Date.now() - t0) / 1000),
+    errors: errors.slice(0, 5),
+  }),
+);
 await browser.close();
 process.exit(finished && errors.length === 0 ? 0 : 1);

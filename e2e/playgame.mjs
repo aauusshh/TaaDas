@@ -13,7 +13,11 @@ const errors = [];
 page.on('pageerror', (e) => errors.push(String(e)));
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
 await page.addInitScript((f) => {
-  if (f) localStorage.setItem('chautari.settings', JSON.stringify({ reduceMotion: true, animSpeed: 1.5 }));
+  if (f)
+    localStorage.setItem(
+      'chautari.settings',
+      JSON.stringify({ reduceMotion: true, animSpeed: 1.5 }),
+    );
 }, !!fast);
 await page.goto(`${base}/#/play/${game}`);
 
@@ -31,14 +35,20 @@ while (Date.now() - t0 < 600000) {
   }
   const next = page.getByRole('button', { name: 'Next round' });
   if (await next.count()) {
-    if (!shots.has('roundend')) { await shot('roundend'); shots.add('roundend'); }
+    if (!shots.has('roundend')) {
+      await shot('roundend');
+      shots.add('roundend');
+    }
     rounds++;
     await next.click();
     continue;
   }
   const place = page.getByRole('button', { name: 'Place bid' });
   if (await place.count()) {
-    if (!shots.has('bid')) { await shot('bid'); shots.add('bid'); }
+    if (!shots.has('bid')) {
+      await shot('bid');
+      shots.add('bid');
+    }
     await page.getByRole('radio', { name: '3', exact: true }).click();
     await place.click();
     continue;
@@ -52,7 +62,10 @@ while (Date.now() - t0 < 600000) {
       const c = cards.nth(i);
       const op = await c.evaluate((el) => Number(getComputedStyle(el).opacity));
       if (op > 0.9) {
-        if (!shots.has('turn')) { await shot('turn'); shots.add('turn'); }
+        if (!shots.has('turn')) {
+          await shot('turn');
+          shots.add('turn');
+        }
         await c.click({ position: { x: 8, y: 22 } });
         await page.waitForTimeout(80);
         await c.click({ position: { x: 8, y: 22 } });
@@ -64,6 +77,13 @@ while (Date.now() - t0 < 600000) {
     await page.waitForTimeout(300);
   }
 }
-console.log(JSON.stringify({ finished, rounds, seconds: Math.round((Date.now() - t0) / 1000), errors: errors.slice(0, 5) }));
+console.log(
+  JSON.stringify({
+    finished,
+    rounds,
+    seconds: Math.round((Date.now() - t0) / 1000),
+    errors: errors.slice(0, 5),
+  }),
+);
 await browser.close();
 process.exit(finished && errors.length === 0 ? 0 : 1);

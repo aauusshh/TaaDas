@@ -9,7 +9,10 @@ const errors = [];
 const mk = async (name) => {
   const ctx = await browser.newContext({ viewport: { width: 360, height: 740 }, hasTouch: true });
   await ctx.addInitScript(() =>
-    localStorage.setItem('chautari.settings', JSON.stringify({ reduceMotion: true, animSpeed: 1.5 })),
+    localStorage.setItem(
+      'chautari.settings',
+      JSON.stringify({ reduceMotion: true, animSpeed: 1.5 }),
+    ),
   );
   const page = await ctx.newPage();
   page.on('pageerror', (e) => errors.push(`${name}: ${e}`));
@@ -47,7 +50,11 @@ await client.getByRole('button', { name: 'Lock bets' }).click();
 await host.getByRole('button', { name: 'Shake' }).click({ timeout: 20000 });
 
 const summaryText = async (page) => {
-  await page.getByRole('button', { name: 'Next round' }).or(page.getByText('Waiting for the next round')).first().waitFor({ timeout: 20000 });
+  await page
+    .getByRole('button', { name: 'Next round' })
+    .or(page.getByText('Waiting for the next round'))
+    .first()
+    .waitFor({ timeout: 20000 });
   return (await page.getByRole('dialog').innerText()).replace(/\s+/g, ' ');
 };
 const [h, c] = await Promise.all([summaryText(host), summaryText(client)]);
@@ -55,5 +62,7 @@ await host.screenshot({ path: `${out}/lb-host-summary.png` });
 await client.screenshot({ path: `${out}/lb-client-summary.png` });
 const strip = (s) => s.replace(/Next round|Waiting for the next round/g, '').trim();
 if (strip(h) !== strip(c)) await fail(`screens disagree:\n${h}\n${c}`);
-console.log(JSON.stringify({ ok: true, code, summary: strip(h).slice(0, 120), errors: errors.slice(0, 5) }));
+console.log(
+  JSON.stringify({ ok: true, code, summary: strip(h).slice(0, 120), errors: errors.slice(0, 5) }),
+);
 await browser.close();

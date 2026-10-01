@@ -1,0 +1,207 @@
+/* Shared layout for the chip games: Teen Patti, Kitti and In Between. */
+.board {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 4px 4px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.board > * {
+  flex-shrink: 0;
+}
+
+.seats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 8px;
+  padding: 2px 52px 0;
+}
+.seatBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.seatBox[data-out='true'] {
+  opacity: 0.45;
+}
+.backs {
+  display: flex;
+}
+.back {
+  border-radius: 5.7% / 4.1%;
+  box-shadow: 0 1px 1.5px rgb(0 0 0 / 0.5);
+}
+.back + .back {
+  margin-left: -14px;
+}
+.put {
+  min-width: 26px;
+  padding: 0 7px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--rim-dark);
+  color: var(--brass-light);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  box-shadow: 0 0 0 1px var(--brass-dark);
+}
+
+.center {
+  position: relative;
+  flex: 1;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 6px 0 30px;
+}
+.potRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 26px;
+}
+.stakeNote {
+  font-size: 13px;
+  color: var(--panel-muted);
+}
+.stakeNote b {
+  color: var(--brass-light);
+}
+.callout {
+  position: absolute;
+  left: 50%;
+  top: 4%;
+  transform: translateX(-50%);
+  padding: 6px 16px;
+  border-radius: 14px 14px 14px 3px;
+  background: var(--paper);
+  color: #1d1a12;
+  font-family: var(--font-display);
+  font-size: 20px;
+  box-shadow: 0 3px 8px rgb(0 0 0 / 0.45);
+  white-space: nowrap;
+  z-index: 8;
+  pointer-events: none;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 6px 8px;
+}
+.statusRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.round {
+  font-size: 12px;
+  color: var(--panel-muted);
+}
+.say {
+  font-weight: 700;
+  color: var(--brass-light);
+}
+.muted {
+  color: var(--panel-muted);
+  font-size: 14px;
+}
+.btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.btns button {
+  flex: 1 1 auto;
+}
+.cost {
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.mine {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.myCards {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.myCards > div {
+  border-radius: 5.7% / 4.1%;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.55);
+}
+.handName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brass-light);
+}
+
+.reveal {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.revealRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  align-items: center;
+  padding: 5px 6px;
+  border-bottom: 1px dashed rgb(244 241 232 / 0.16);
+}
+.revealRow[data-win='true'] .who {
+  color: var(--brass-light);
+}
+.who {
+  font-weight: 700;
+  font-size: 14px;
+}
+.net {
+  font-weight: 700;
+}
+.net[data-neg='true'] {
+  color: var(--danger);
+}
+.net[data-pos='true'] {
+  color: var(--ok);
+}
+.revealCards {
+  grid-column: 1 / span 2;
+  display: flex;
+  gap: 3px;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .board {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 4px 8px;
+  }
+  .seats {
+    width: 100%;
+  }
+  .center {
+    flex: 1 1 45%;
+    min-height: 0;
+    padding-bottom: 18px;
+  }
+  .controls {
+    flex: 1 1 40%;
+    justify-content: center;
+  }
+}

@@ -7,7 +7,11 @@ const browser = await chromium.launch();
 for (const spec of specs) {
   const [name, route, size, full] = spec.split(':');
   const [w, h] = size.split('x').map(Number);
-  const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 1, hasTouch: true });
+  const ctx = await browser.newContext({
+    viewport: { width: w, height: h },
+    deviceScaleFactor: 1,
+    hasTouch: true,
+  });
   const page = await ctx.newPage();
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));

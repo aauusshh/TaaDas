@@ -251,8 +251,11 @@ function SetupBody({
     });
     saveSetup(game.id, { mode, count: seats, timerSec, hints, difficulty, config });
     const forced: GameConfig = { ...config, ...(game.modeConfig?.(mode) ?? {}) };
-    if (game.id === 'langurburja' && mode === 'bots') {
+    // playing alone stakes the profile chips in every chip game
+    if ('startChips' in game.defaultConfig && mode === 'bots') {
       forced.startChips = Math.max(500, useProfile.getState().chips);
+    }
+    if (game.id === 'langurburja' && mode === 'bots') {
       players[players.length - 1] = {
         ...players[players.length - 1],
         name: t('lb.house'),

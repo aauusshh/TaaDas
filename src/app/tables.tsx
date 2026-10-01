@@ -9,6 +9,9 @@ export const tables: Partial<Record<GameId, ComponentType<TableProps>>> = {
   rangi: lazy(() => import('../ui/games/rangi/RangiTable')),
   langurburja: lazy(() => import('../ui/games/langur/LangurTable')),
   jutpatti: lazy(() => import('../ui/games/drawdiscard/JutPattiTable')),
+  teenpatti: lazy(() => import('../ui/games/chips/TeenPattiTable')),
+  kitti: lazy(() => import('../ui/games/chips/KittiTable')),
+  inbetween: lazy(() => import('../ui/games/chips/InBetweenTable')),
   dhumbal: lazy(() => import('../ui/games/drawdiscard/DhumbalTable')),
 };
 

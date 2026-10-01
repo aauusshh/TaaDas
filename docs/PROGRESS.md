@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 9 — Teen Patti + Kitti + In Between (Phase 8 done)
+Phase 10 — Marriage (Phase 9 done)
 
 ## Branch
 dev
@@ -28,6 +28,8 @@ dev
 - Phase 7: Langur Burja engine (bets, close, roll, settle, payout table config, banker rotation, house banker for solo), bots, brass bowl + 3D dice + cloth mat UI, device-sharing mode (banker holds the phone), online synced roll verified with two browsers, profile chips follow solo results. 11 tests, sim ok.
 
 - Phase 8: Jut Patti (joker modes, pair color, odd deals cut to fit the stock, matches, stake chips) and Dhumbal (sets, runs, jokers wild, run-end picks, throw-after-match, Jhyap with counter, elimination or fixed rounds, stall safety) engines + bots + shared draw/discard table UI, multi-select hand. 25 tests, sims ok, full games auto-played at 360x740 (landscape checked for Jut Patti).
+
+- Phase 9: shared threeCard evaluator (category order, A-2-3 options, wilds, percentile table, 2-3-5 option), Teen Patti (blind/seen stakes, raise, side show, show, pot limit, max blind, Muflis/AK47/Joker), Kitti (280 splits, ties, salami, kitti carry-over, pack first, descending, run2), In Between (posts, ace choice, equal-post guess, reshuffle), bots for all, three table UIs. 74 new tests, sims ok, full games auto-played at 360x740.
 
 ## Decisions and why
 - Newer toolchain than the spec assumed (Vite 8, TS 6, vitest 5, react-router 7, zod 4, motion 13). Used as installed.
@@ -72,8 +74,14 @@ dev
 - Hand supports multi-select (selectedIds/onToggle) and marked cards (jokers).
 - Jut Patti stake option moves free chips between players at the end of each round.
 
+- Players with fewer chips than the boot sit out a hand; with fewer than two funded players the game ends.
+- Teen Patti: a player who cannot afford a bet can only look or pack (no all-in).
+- Kitti: legalActions lists only auto/pack; apply() validates any arrangement and rejects bad ones.
+- In Between: a turn's result lives in events and state.last; there is no separate result phase.
+- All chip games stake the profile chips when playing alone and update the profile at game end.
+
 ## Next step
-Phase 9 per SPEC section 16 (rules/teen-patti, kitti, in-between): threeCard evaluator, pot and betting controls, arranging UI.
+Phase 10 per SPEC section 16 (rules/marriage): meld solver, seen/unseen flow, maal reveal, dublee path, scoring, auto-arrange, 2-row hand.
 
 ## Questions for owner
 Answer under each question. Claude uses the default until answered.
@@ -90,3 +98,6 @@ Answer under each question. Claude uses the default until answered.
 - Rangi: bots never jump in out of turn. Fine, or should hard bots try?
 - Dhumbal: when a round drags on, I close it after 40 turns per player (lowest hand wins, no penalty). OK?
 - Jut Patti: deals that leave fewer than 10 stock cards are reduced automatically (6 players deal 5). OK?
+- Teen Patti: a player who cannot afford a bet can only pack (no all-in). Is that fine?
+- Kitti: default tie rule is that nobody wins a tied show; salami bonus on by default. OK?
+- In Between: when the pot runs dry everyone antes again; players under the ante sit out. OK?

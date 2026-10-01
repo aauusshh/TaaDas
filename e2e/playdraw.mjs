@@ -16,7 +16,9 @@ await page.addInitScript(() =>
 );
 await page.goto(`${base}/#/`);
 await page.getByRole('button', { name: game === 'jutpatti' ? 'Jut Patti' : 'Dhumbal' }).click();
-await page.getByLabel('Rules', { exact: true }).selectOption({ label: game === 'jutpatti' ? 'One round' : 'Five rounds' });
+await page
+  .getByLabel('Rules', { exact: true })
+  .selectOption({ label: game === 'jutpatti' ? 'One round' : 'Five rounds' });
 await page.getByRole('button', { name: 'Play', exact: true }).click();
 
 const has = (name) => page.getByRole('button', { name, exact: true });
@@ -88,6 +90,13 @@ while (Date.now() - t0 < 220000) {
     }
   }
 }
-console.log(JSON.stringify({ finished, moves, seconds: Math.round((Date.now() - t0) / 1000), errors: errors.slice(0, 5) }));
+console.log(
+  JSON.stringify({
+    finished,
+    moves,
+    seconds: Math.round((Date.now() - t0) / 1000),
+    errors: errors.slice(0, 5),
+  }),
+);
 await browser.close();
 process.exit(finished && errors.length === 0 ? 0 : 1);

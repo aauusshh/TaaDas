@@ -76,6 +76,13 @@ while (Date.now() - t0 < 240000) {
     await page.waitForTimeout(250);
   }
 }
-console.log(JSON.stringify({ finished, moves, seconds: Math.round((Date.now() - t0) / 1000), errors: errors.slice(0, 5) }));
+console.log(
+  JSON.stringify({
+    finished,
+    moves,
+    seconds: Math.round((Date.now() - t0) / 1000),
+    errors: errors.slice(0, 5),
+  }),
+);
 await browser.close();
 process.exit(finished && errors.length === 0 ? 0 : 1);

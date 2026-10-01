@@ -51,3 +51,10 @@
 - Dhumbal shows the last throw as a row you pick from and your own throw as a second row; Jhyap reveals every hand with the points added.
 - Generic: the center of both tables is quiet and plain. Candidate for Phase 11 polish (felt markings, a place for the indicator).
 - Fixed: Draw/Take tags overlapped the opponent seats in landscape (moved below the piles).
+
+## Phase 9 self-review (Teen Patti, Kitti, In Between)
+- Teen Patti: your three cards sit in the open at the bottom (backs until you look), opponents show three small backs and what they have put in; the pot is a real chip stack with the boot flying in at the deal. Bets, packs and side shows speak in a paper bubble.
+- Kitti: nine cards go into three labelled rows by tap-then-tap, each row names its hand live ("Sequence", "Pair"); Auto arrange fills the best split to tweak.
+- In Between: two posts with a dashed gap, the third card lands in the gap; the stepper has Min, Half pot and Max.
+- Generic: the three tables share one plain layout. Candidate for Phase 11 polish.
+- Fixed: In Between's row was wider than 360 px (deck and chips cut off); cards now size from the width.

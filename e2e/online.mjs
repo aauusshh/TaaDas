@@ -38,11 +38,15 @@ await client.goto(`${base}/#/join/${code}`);
 try {
   await client.getByRole('button', { name: "I'm ready" }).click({ timeout: 30000 });
 } catch {
-  await fail('client never reached the lobby: ' + (await client.locator('body').innerText()).slice(0, 300));
+  await fail(
+    'client never reached the lobby: ' + (await client.locator('body').innerText()).slice(0, 300),
+  );
 }
 await client.screenshot({ path: `${out}/client-lobby.png` });
 const startBtn = host.getByRole('button', { name: 'Start game' });
-await host.waitForFunction(() => !document.querySelector('button[disabled]:not([aria-label])') || true);
+await host.waitForFunction(
+  () => !document.querySelector('button[disabled]:not([aria-label])') || true,
+);
 for (let i = 0; i < 40 && (await startBtn.isDisabled()); i++) await host.waitForTimeout(250);
 if (await startBtn.isDisabled()) await fail('start button never enabled');
 await startBtn.click();
@@ -73,7 +77,10 @@ const plays = { host: 0, client: 0 };
 const t0 = Date.now();
 let shot = false;
 while ((plays.host < 3 || plays.client < 3) && Date.now() - t0 < 150000) {
-  for (const [name, page] of [['host', host], ['client', client]]) {
+  for (const [name, page] of [
+    ['host', host],
+    ['client', client],
+  ]) {
     const r = await act(page);
     if (r === 'play') plays[name]++;
   }
@@ -90,7 +97,9 @@ if (plays.host < 3 || plays.client < 3) await fail(`not enough plays ${JSON.stri
 const seatBefore = await client.evaluate(() => window.__client.seat);
 const leaked = await (async () => {
   const log = await client.evaluate(() => window.__netLog);
-  const ids = new Set(log.flatMap((m) => [...m.matchAll(/"id":(\d+),"suit"/g)].map((x) => Number(x[1]))));
+  const ids = new Set(
+    log.flatMap((m) => [...m.matchAll(/"id":(\d+),"suit"/g)].map((x) => Number(x[1]))),
+  );
   const others = await host.evaluate((seat) => {
     const h = window.__host;
     const out = [];
@@ -103,7 +112,9 @@ if (leaked.length) await fail(`client saw cards held by others: ${leaked}`);
 
 // reload gives the same seat back
 await client.reload();
-await client.waitForFunction(() => window.__client && window.__client.state === 'playing', null, { timeout: 30000 });
+await client.waitForFunction(() => window.__client && window.__client.state === 'playing', null, {
+  timeout: 30000,
+});
 const seatAfter = await client.evaluate(() => window.__client.seat);
 if (seatAfter !== seatBefore) await fail(`seat changed ${seatBefore} -> ${seatAfter}`);
 await client.waitForTimeout(1500);
