@@ -47,6 +47,9 @@ export interface Launch {
   players: PlayerInfo[];
   config: GameConfig;
   hints: boolean;
+  /** turn timer seconds, 0 = off */
+  timerSec?: number;
+  mode?: 'bots' | 'local' | 'online';
   seed?: number;
   /** restore a saved game instead of starting a new one */
   resume?: boolean;

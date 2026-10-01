@@ -26,6 +26,13 @@ export interface Session<V = unknown, A = unknown> {
   resume(): void;
   /** events from setup (the deal), for the first animation */
   readonly initialEvents: GameEvent[];
+  /** false between rounds / at game end */
+  isPlayPhase(): boolean;
+  /** turn timer for a seat, null when off or not their turn */
+  getTimer(seat: number): { remainingMs: number; totalMs: number } | null;
+  isAuto(seat: number): boolean;
+  /** put a seat on or off Auto (a bot plays for it) */
+  setAuto(seat: number, on: boolean): void;
   dispose(): void;
 }
 

@@ -9,6 +9,8 @@ export interface TableProps {
   players: PlayerInfo[];
   /** single-player hints: highlight the medium bot's suggestion */
   hints: boolean;
+  /** several humans share this device and it is not this seat's turn: show backs */
+  handHidden: boolean;
   onLeave: () => void;
   onRematch: () => void;
 }

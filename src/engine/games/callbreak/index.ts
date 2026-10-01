@@ -233,6 +233,7 @@ export const callBreak: GameDefinition<
     return { type: 'play', cardId: legalFor(s, seat)[0].id };
   },
   result,
+  isPlayPhase: (s) => s.phase === 'bidding' || s.phase === 'playing',
   bot: callBreakBot,
   invariants(s) {
     const inHands = s.hands.reduce((t, h) => t + h.length, 0);

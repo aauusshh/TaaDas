@@ -64,6 +64,7 @@ export default function CallBreakTable({
   mySeat,
   players,
   hints,
+  handHidden,
   onLeave,
   onRematch,
 }: TableProps) {
@@ -215,11 +216,11 @@ export default function CallBreakTable({
 
   const rng = useMemo(() => createRng(1), []);
   const hintId = useMemo(() => {
-    if (!hints || !view || !myTurn || view.phase !== 'playing') return null;
+    if (!hints || handHidden || !view || !myTurn || view.phase !== 'playing') return null;
     const legal = session.legalActions(mySeat) as CallBreakAction[];
     const a = callBreak.bot(view, legal, 'medium', rng);
     return a.type === 'play' ? a.cardId : null;
-  }, [hints, view, myTurn, session, mySeat, rng]);
+  }, [hints, handHidden, view, myTurn, session, mySeat, rng]);
   const bidHint =
     hints && view && myTurn && view.phase === 'bidding'
       ? estimateBid(view.hand, view.config.maxBid)
@@ -237,7 +238,7 @@ export default function CallBreakTable({
   };
 
   const playable =
-    view && myTurn && view.phase === 'playing' && settings.showPlayable
+    !handHidden && view && myTurn && view.phase === 'playing' && settings.showPlayable
       ? new Set(view.legalIds)
       : null;
 
@@ -255,6 +256,9 @@ export default function CallBreakTable({
     return `${view.tricksWon[seat]}/${view.bids[seat]}`;
   };
 
+  const timerFor = (seat: number) =>
+    view && !busy && view.turn === seat ? session.getTimer(seat) : null;
+
   const seatNode = (seat: number, row = false) => (
     <Seat
       seat={seat}
@@ -263,6 +267,9 @@ export default function CallBreakTable({
       isBot={players[seat].isBot}
       value={view ? view.totals[seat] : 0}
       info={seatInfo(seat)}
+      auto={session.isAuto(seat)}
+      timerMs={timerFor(seat)?.remainingMs}
+      timerTotalMs={timerFor(seat)?.totalMs}
       isTurn={
         !!view &&
         !busy &&
@@ -446,6 +453,18 @@ export default function CallBreakTable({
                 </span>
               )}
               <span className={s.say}>{status}</span>
+              {session.isAuto(mySeat) && (
+                <Button
+                  size="small"
+                  tone="primary"
+                  onClick={() => {
+                    session.setAuto(mySeat, false);
+                    setLanded(new Set());
+                  }}
+                >
+                  {t('cb.imBack')}
+                </Button>
+              )}
             </div>
           </div>
           <div className={s.handWrap}>
@@ -458,6 +477,7 @@ export default function CallBreakTable({
               onPlay={(id) => submit({ type: 'play', cardId: id })}
               playableIds={playable}
               hintId={hintId}
+              faceDown={handHidden}
               disabled={!myTurn || view?.phase !== 'playing'}
             />
           </div>

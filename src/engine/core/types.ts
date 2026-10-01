@@ -93,6 +93,8 @@ export interface GameDefinition<
   timeoutAction(state: S, seat: number): A;
   result(state: S): GameResult | null;
   bot(view: V, legal: A[], difficulty: Difficulty, rng: Rng): A;
+  /** false between rounds and at game end: no turn timer, no pass-and-play cover (default true) */
+  isPlayPhase?(state: S): boolean;
   /** sim only: return a message when state is inconsistent (card count, chip total, ...) */
   invariants?(state: S): string | null;
 }

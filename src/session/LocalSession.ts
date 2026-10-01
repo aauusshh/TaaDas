@@ -18,6 +18,8 @@ export interface LocalSessionOptions {
   seed?: number;
   /** milliseconds a bot "thinks"; return 0 in tests and sims */
   thinkMs?: (difficulty: Difficulty) => number;
+  /** turn timer in seconds for human seats; 0 or undefined is off */
+  timerSec?: number;
   onSave?: (snapshot: Snapshot) => void;
 }
 
@@ -27,9 +29,16 @@ const defaultThink = (d: Difficulty) => {
   return Math.round(base / useSettings.getState().animSpeed);
 };
 
+interface HumanTimer {
+  total: number;
+  /** wall-clock time the timer ends; null while paused */
+  endsAt: number | null;
+  remaining: number;
+  handle: ReturnType<typeof setTimeout> | null;
+}
+
 /** Runs the engine in this browser: bots plus humans sharing the device. */
 export class LocalSession implements Session {
-  private paused = false;
   readonly gameId;
   readonly players: PlayerInfo[];
   private game: AnyGame;
@@ -38,10 +47,14 @@ export class LocalSession implements Session {
   private state: unknown;
   private version = 0;
   private listeners = new Set<(u: SessionUpdate) => void>();
-  private timers = new Map<number, ReturnType<typeof setTimeout>>();
+  private botTimers = new Map<number, ReturnType<typeof setTimeout>>();
+  private humanTimers = new Map<number, HumanTimer>();
+  private timeouts = new Map<number, number>();
   private auto = new Set<number>();
+  private paused = false;
   private disposed = false;
   private think: (d: Difficulty) => number;
+  private timerMs: number;
   private onSave?: (s: Snapshot) => void;
   /** events from setup, delivered to the first subscriber so the UI can animate the deal */
   readonly initialEvents: GameEvent[];
@@ -53,6 +66,7 @@ export class LocalSession implements Session {
     this.players = opts.players;
     this.config = opts.config;
     this.think = opts.thinkMs ?? defaultThink;
+    this.timerMs = (opts.timerSec ?? 0) * 1000;
     this.onSave = opts.onSave;
     if (restored) {
       this.state = restored.state;
@@ -97,8 +111,15 @@ export class LocalSession implements Session {
 
   pause() {
     this.paused = true;
-    for (const t of this.timers.values()) clearTimeout(t);
-    this.timers.clear();
+    for (const t of this.botTimers.values()) clearTimeout(t);
+    this.botTimers.clear();
+    const now = Date.now();
+    for (const h of this.humanTimers.values()) {
+      if (h.handle) clearTimeout(h.handle);
+      h.handle = null;
+      if (h.endsAt !== null) h.remaining = Math.max(0, h.endsAt - now);
+      h.endsAt = null;
+    }
   }
   resume() {
     this.paused = false;
@@ -120,6 +141,9 @@ export class LocalSession implements Session {
   result(): GameResult | null {
     return this.game.result(this.state);
   }
+  isPlayPhase() {
+    return this.game.isPlayPhase ? this.game.isPlayPhase(this.state) : true;
+  }
   getVersion() {
     return this.version;
   }
@@ -127,12 +151,26 @@ export class LocalSession implements Session {
     return this.lastEvents;
   }
 
+  getTimer(seat: number) {
+    const h = this.humanTimers.get(seat);
+    if (!h) return null;
+    const remainingMs = h.endsAt === null ? h.remaining : Math.max(0, h.endsAt - Date.now());
+    return { remainingMs, totalMs: h.total };
+  }
+
+  isAuto(seat: number) {
+    return this.auto.has(seat);
+  }
   isBotSeat(seat: number) {
     return this.players[seat].isBot || this.auto.has(seat);
   }
   setAuto(seat: number, on: boolean) {
     if (on) this.auto.add(seat);
-    else this.auto.delete(seat);
+    else {
+      this.auto.delete(seat);
+      this.timeouts.set(seat, 0);
+    }
+    this.clearHumanTimer(seat);
     this.pump();
   }
 
@@ -144,11 +182,13 @@ export class LocalSession implements Session {
   submit(seat: number, action: unknown) {
     if (this.disposed) return;
     if (!this.currentActors().includes(seat)) throw new IllegalActionError('not your turn');
+    this.timeouts.set(seat, 0);
     this.run(seat, action);
     this.pump();
   }
 
   private run(seat: number, action: unknown) {
+    this.clearHumanTimer(seat);
     const step = this.game.apply(this.state, seat, action, this.rng);
     this.state = step.state;
     this.version++;
@@ -158,19 +198,60 @@ export class LocalSession implements Session {
     for (const l of [...this.listeners]) l(update);
   }
 
+  private clearHumanTimer(seat: number) {
+    const h = this.humanTimers.get(seat);
+    if (h?.handle) clearTimeout(h.handle);
+    this.humanTimers.delete(seat);
+  }
+
   private pump() {
-    if (this.disposed || this.paused || this.result()) return;
-    for (const seat of this.currentActors()) {
-      if (!this.isBotSeat(seat) || this.timers.has(seat)) continue;
-      const delay = this.think(this.players[seat].difficulty);
-      this.timers.set(
-        seat,
-        setTimeout(() => {
-          this.timers.delete(seat);
-          this.botMove(seat);
-        }, delay),
-      );
+    if (this.disposed || this.result()) return;
+    const actors = this.currentActors();
+    // timers for seats that are no longer acting go away
+    for (const seat of [...this.humanTimers.keys()])
+      if (!actors.includes(seat)) this.clearHumanTimer(seat);
+    if (this.paused) {
+      return;
     }
+    const playPhase = this.isPlayPhase();
+    for (const seat of actors) {
+      if (this.isBotSeat(seat)) {
+        if (!playPhase && this.players[seat].isBot === false) continue;
+        if (this.botTimers.has(seat)) continue;
+        const delay = this.think(this.players[seat].difficulty);
+        this.botTimers.set(
+          seat,
+          setTimeout(() => {
+            this.botTimers.delete(seat);
+            this.botMove(seat);
+          }, delay),
+        );
+      } else if (this.timerMs > 0 && playPhase) {
+        this.armHumanTimer(seat);
+      }
+    }
+  }
+
+  private armHumanTimer(seat: number) {
+    let h = this.humanTimers.get(seat);
+    if (!h) {
+      h = { total: this.timerMs, endsAt: null, remaining: this.timerMs, handle: null };
+      this.humanTimers.set(seat, h);
+    }
+    if (h.handle) return;
+    h.endsAt = Date.now() + h.remaining;
+    h.handle = setTimeout(() => this.onTimeout(seat), h.remaining);
+  }
+
+  private onTimeout(seat: number) {
+    this.clearHumanTimer(seat);
+    if (this.disposed || this.paused || !this.currentActors().includes(seat)) return;
+    const n = (this.timeouts.get(seat) ?? 0) + 1;
+    this.timeouts.set(seat, n);
+    if (n >= 2) this.auto.add(seat);
+    const action = this.game.timeoutAction(this.state, seat);
+    this.run(seat, action);
+    this.pump();
   }
 
   private botMove(seat: number) {
@@ -189,8 +270,10 @@ export class LocalSession implements Session {
 
   dispose() {
     this.disposed = true;
-    for (const t of this.timers.values()) clearTimeout(t);
-    this.timers.clear();
+    for (const t of this.botTimers.values()) clearTimeout(t);
+    this.botTimers.clear();
+    for (const h of this.humanTimers.values()) if (h.handle) clearTimeout(h.handle);
+    this.humanTimers.clear();
     this.listeners.clear();
   }
 }

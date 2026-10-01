@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { motion } from 'motion/react';
 import type { Card } from '../../engine/core/cards';
-import { CardFace } from '../cards/CardFace';
+import { CardBack, CardFace } from '../cards/CardFace';
 import { useAnchor } from '../anim/anchors';
 import { effectiveReduceMotion } from '../../storage/settings';
 import s from './Hand.module.css';
@@ -21,6 +21,8 @@ export interface HandProps {
   disabled?: boolean;
   /** card to highlight as a hint */
   hintId?: number | null;
+  /** show backs instead of faces (pass-and-play while another player holds the device) */
+  faceDown?: boolean;
 }
 
 const SPREAD_DEG = 12;
@@ -39,8 +41,12 @@ function HandCard({
   onDrop,
   disabled,
   hint,
+  faceDown,
+  focusable,
 }: {
   hint: boolean;
+  faceDown: boolean;
+  focusable: boolean;
   card: Card;
   x: number;
   y: number;
@@ -77,9 +83,9 @@ function HandCard({
         if (info.offset.y < -70) onDrop();
       }}
       onClick={onTap}
-      tabIndex={selected ? 0 : -1}
+      tabIndex={focusable ? 0 : -1}
     >
-      <CardFace card={card} />
+      {faceDown ? <CardBack /> : <CardFace card={card} />}
     </motion.button>
   );
 }
@@ -95,6 +101,7 @@ export function Hand({
   gapAfter,
   disabled = false,
   hintId = null,
+  faceDown = false,
 }: HandProps) {
   const box = useRef<HTMLDivElement | null>(null);
   const anchor = useAnchor(`hand:${seat ?? 0}`);
@@ -173,7 +180,9 @@ export function Hand({
             lifted={selected ? 16 : playableIds && playable ? 6 : 0}
             dim={!!playableIds && !playable}
             selected={selected}
-            hint={c.id === hintId}
+            hint={!faceDown && c.id === hintId}
+            faceDown={faceDown}
+            focusable={selected || (selectedId === null && i === 0)}
             disabled={disabled}
             onTap={() => {
               if (disabled) return;

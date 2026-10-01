@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 4 — Local modes (Phase 3 done)
+Phase 5 — Online (Phase 4 done)
 
 ## Branch
 dev
@@ -18,6 +18,8 @@ dev
 - Phase 2: tokens + 4 themes, fonts, SVG card faces/backs/joker, RangiCard, Hand (fan, drag, keyboard), Piles, Seat+TurnRing, ChipStack, 16 avatars, anim queue + FlightLayer (WAAPI), SoundManager with synth fallback, settings/profile stores, i18n en/ne, Home, SettingsSheet, dev kit /dev/kit. Screenshots reviewed (docs/design-notes.md).
 
 - Phase 3: Call Break engine (rules, config, bot easy/medium/hard, view), 31 unit tests, sim 2000 games ok, table UI (TableShell, Ledger, ResultPanel, Petals, bid chips, last trick review, rules sheet), GameScreen at /play/:gameId. Full 5-round game auto-played through the UI at 360x740 with no console errors (e2e/playgame.mjs).
+
+- Phase 4: setup sheet from configSchema (modes bots/same device, player count, names, bot level, presets + saved house rules, timer, hints), turn timer with Auto seat after 2 timeouts, pass-and-play cover and face-down hands, profile screen + stats, save/resume with Continue game, haptics helper. 36 tests. e2e/local.mjs verified setup, cover, resume.
 
 ## Decisions and why
 - Newer toolchain than the spec assumed (Vite 8, TS 6, vitest 5, react-router 7, zod 4, motion 13). Used as installed.
@@ -39,8 +41,12 @@ dev
 - Call Break UI uses a launch store (app/launch.ts); Phase 4 setup sheet fills it.
 - Manual drag-reorder of hand not built yet; autoSort setting sorts by suit.
 
+- Turn timer and cover only apply while GameDefinition.isPlayPhase() is true.
+- Setup keeps per-game memory (setup.<game>) and house rules (house.<game>) in localStorage.
+- Online tab in setup shows a placeholder until Phase 5.
+
 ## Next step
-Phase 4 per SPEC section 16 (SPEC 5, 9, 10): setup sheet from configSchema, presets, pass-and-play cover, profile, stats, save/resume.
+Phase 5 per SPEC section 16 (SPEC 6, 7): net layer (zod protocol, transport interface, PeerJS), host/client sessions, lobby, QR/share, reconnect, Auto seats, wake lock, reactions.
 
 ## Questions for owner
 Answer under each question. Claude uses the default until answered.

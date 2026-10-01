@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { availableGameIds } from '../engine/registry';
 import { Settings as SettingsIcon } from 'lucide-react';
@@ -8,6 +8,10 @@ import { useProfile } from '../storage/profile';
 import { Avatar } from '../ui/components/Avatar';
 import { Button } from '../ui/components/Button';
 import { BottomSheet } from '../ui/components/Overlays';
+import { SetupSheet } from './SetupSheet';
+import { loadSave } from '../storage/saves';
+import { useLaunch } from './launch';
+import type { GameId } from '../engine/core/types';
 import { GameObject } from '../ui/table/GameObjects';
 import { sound } from '../ui/sound/SoundManager';
 import { SettingsSheet } from './SettingsSheet';
@@ -32,11 +36,18 @@ export function Home() {
   const [open, setOpen] = useState<string | null>(null);
   const [settings, setSettings] = useState(false);
   const [code, setCode] = useState('');
+  const saved = useMemo(() => loadSave(), []);
+  const setLaunch = useLaunch((l) => l.set);
 
   return (
     <div className={s.table} onPointerDown={() => sound.unlock()}>
       <header className={s.top}>
-        <button type="button" className={s.profile} aria-label={t('home.profile')}>
+        <button
+          type="button"
+          className={s.profile}
+          aria-label={t('home.profile')}
+          onClick={() => nav('/profile')}
+        >
           <Avatar id={profile.avatar} size={40} />
           <span className={s.who}>
             <b>{profile.name}</b>
@@ -77,6 +88,25 @@ export function Home() {
       </main>
 
       <footer className={s.join}>
+        {saved && (
+          <Button
+            tone="primary"
+            className={s.continue}
+            onClick={() => {
+              setLaunch({
+                gameId: saved.snapshot.gameId,
+                players: saved.snapshot.players,
+                config: saved.snapshot.config,
+                hints: saved.meta.hints,
+                timerSec: saved.meta.timerSec,
+                resume: true,
+              });
+              nav('/play/' + saved.snapshot.gameId);
+            }}
+          >
+            {t('home.continueGame', { game: t(`game.${saved.snapshot.gameId}`) })}
+          </Button>
+        )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -104,24 +134,15 @@ export function Home() {
         <p className={s.note}>{t('app.chipsNote')}</p>
       </footer>
 
-      <BottomSheet
-        open={open !== null}
-        onClose={() => setOpen(null)}
-        title={open ? t(`game.${open}`) : ''}
-      >
-        {open && (
-          <>
-            <p style={{ marginTop: 0 }}>{t(`game.${open}.blurb`)}</p>
-            {availableGameIds().includes(open as never) ? (
-              <Button tone="primary" onClick={() => nav('/play/' + open)}>
-                {t('common.play')}
-              </Button>
-            ) : (
-              <p style={{ color: 'var(--panel-muted)' }}>{t('home.comingSoon')}</p>
-            )}
-          </>
-        )}
-      </BottomSheet>
+      {open && availableGameIds().includes(open as GameId) && (
+        <SetupSheet gameId={open as GameId} onClose={() => setOpen(null)} />
+      )}
+      {open && !availableGameIds().includes(open as GameId) && (
+        <BottomSheet open onClose={() => setOpen(null)} title={t(`game.${open}`)}>
+          <p style={{ marginTop: 0 }}>{t(`game.${open}.blurb`)}</p>
+          <p style={{ color: 'var(--panel-muted)' }}>{t('home.comingSoon')}</p>
+        </BottomSheet>
+      )}
       <SettingsSheet open={settings} onClose={() => setSettings(false)} />
     </div>
   );

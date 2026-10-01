@@ -24,3 +24,8 @@
 - Fixed: hand was clipped by the rounded corner and bottom edge; landscape bid panel pushed the hand off screen (bid now overlays the empty center).
 - Fixed: seat info separated into score (muted) and won/bid pill (brass).
 - Deal uses a 40 ms stagger (spec says 70) so a 52-card deal stays under 3 s.
+
+## Phase 4 notes
+- Setup sheet is built from configSchema: groups, steppers, toggles, segmented selects, preset dropdown plus saved house rules.
+- Pass-and-play: full-screen "Pass to <name>" cover; hands show backs whenever the viewing seat is not the actor; tab-hide re-covers.
+- Reload resumes via a saved snapshot (Home shows Continue game); finished games clear the save.

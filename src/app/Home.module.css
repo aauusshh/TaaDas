@@ -170,3 +170,8 @@
     flex-direction: column;
   }
 }
+
+.continue {
+  width: 100%;
+  margin-bottom: 10px;
+}

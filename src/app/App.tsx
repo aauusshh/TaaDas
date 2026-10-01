@@ -8,6 +8,7 @@ import { sound } from '../ui/sound/SoundManager';
 import { Home } from './Home';
 import { DevKit } from './DevKit';
 import { GameScreen } from './GameScreen';
+import { ProfileScreen } from './ProfileScreen';
 
 function Placeholder({ text }: { text: string }) {
   return (
@@ -39,6 +40,7 @@ export function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/play/:gameId" element={<GameScreen />} />
+          <Route path="/profile" element={<ProfileScreen />} />
           <Route
             path="/join/:code"
             element={<Placeholder text="Online rooms arrive in a later build." />}

@@ -3,6 +3,8 @@ import type { GameEvent } from '../../engine/core/events';
 import type { Session } from '../../session/types';
 import { AnimQueue } from './queue';
 
+const initialPlayed = new WeakSet<object>();
+
 export interface RunArgs<V> {
   /** events already filtered for this viewer */
   events: GameEvent[];
@@ -30,7 +32,7 @@ export function useAnimatedView<V>(
     const queue = new AnimQueue();
     let current: V | null = null;
     let pending = 0;
-    const handle = (events: GameEvent[]) => {
+    const handle = (events: GameEvent[], markInitial = false) => {
       const next = session.getView(seat) as V;
       const filtered = session.filterEvents(events, seat);
       pending++;
@@ -38,6 +40,7 @@ export function useAnimatedView<V>(
       void queue.enqueue(async () => {
         try {
           await runRef.current({ events: filtered, prev: current, next });
+          if (markInitial) initialPlayed.add(session);
         } finally {
           current = next;
           setShown(next);
@@ -46,7 +49,8 @@ export function useAnimatedView<V>(
         }
       });
     };
-    handle(session.initialEvents);
+    const first = !initialPlayed.has(session);
+    handle(first ? session.initialEvents : [], first);
     const unsub = session.subscribe((u) => handle(u.events));
     session.start();
     return () => {
