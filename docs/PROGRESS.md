@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 8 — Dhumbal + Jut Patti (Phase 7 done)
+Phase 9 — Teen Patti + Kitti + In Between (Phase 8 done)
 
 ## Branch
 dev
@@ -26,6 +26,8 @@ dev
 - Phase 6: Rangi engine (108-card deck, legality, challenge, Ek/Caught window, stacking, seven-zero, jump-in, draw-until-play, must-play, scoring), bots easy/medium/hard, RangiCard art to the rules file (sindoor/marigold/sky/leaf, symbols, palm, mandala), table UI with color/swap pickers and challenge dialog, rules sheet. 26 Rangi tests, sim 2000 ok, full round auto-played at 360x740 and 740x360.
 
 - Phase 7: Langur Burja engine (bets, close, roll, settle, payout table config, banker rotation, house banker for solo), bots, brass bowl + 3D dice + cloth mat UI, device-sharing mode (banker holds the phone), online synced roll verified with two browsers, profile chips follow solo results. 11 tests, sim ok.
+
+- Phase 8: Jut Patti (joker modes, pair color, odd deals cut to fit the stock, matches, stake chips) and Dhumbal (sets, runs, jokers wild, run-end picks, throw-after-match, Jhyap with counter, elimination or fixed rounds, stall safety) engines + bots + shared draw/discard table UI, multi-select hand. 25 tests, sims ok, full games auto-played at 360x740 (landscape checked for Jut Patti).
 
 ## Decisions and why
 - Newer toolchain than the spec assumed (Vite 8, TS 6, vitest 5, react-router 7, zod 4, motion 13). Used as installed.
@@ -65,8 +67,13 @@ dev
 - GameDefinition got optional hooks: modeConfig (house banks when solo), timerSeats, sharedScreen (no pass cover).
 - Solo stake comes from the profile chips; the profile gains or loses the human's net at game end.
 
+- Dhumbal: a round that lasts 40 turns per player is closed automatically by the lowest hand (no penalty) so bot games always end.
+- Dhumbal: a player with an empty hand can always call Jhyap (even in the first round of turns).
+- Hand supports multi-select (selectedIds/onToggle) and marked cards (jokers).
+- Jut Patti stake option moves free chips between players at the end of each round.
+
 ## Next step
-Phase 8 per SPEC section 16 (rules/dhumbal, rules/jut-patti): shared draw/discard table, both engines + bots.
+Phase 9 per SPEC section 16 (rules/teen-patti, kitti, in-between): threeCard evaluator, pot and betting controls, arranging UI.
 
 ## Questions for owner
 Answer under each question. Claude uses the default until answered.
@@ -81,3 +88,5 @@ Answer under each question. Claude uses the default until answered.
 - Langur Burja: payout table (default: 1 match pays 1x, 2 pays 2x, ... 6 pays 6x)? Nepali names for the crown and flag faces?
 - Rangi: I read "Progressive drawing" as the same thing as the stacking option (whoever cannot stack takes the whole pile). Is there a separate rule in your family?
 - Rangi: bots never jump in out of turn. Fine, or should hard bots try?
+- Dhumbal: when a round drags on, I close it after 40 turns per player (lowest hand wins, no penalty). OK?
+- Jut Patti: deals that leave fewer than 10 stock cards are reduced automatically (6 players deal 5). OK?

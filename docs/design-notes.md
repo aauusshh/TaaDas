@@ -45,3 +45,9 @@
 - Generic: chip tray and buttons are the standard components.
 - Fixed: seats overlapped the bowl (flex shrink); dice showed crowns before the roll (hidden until the lid lifts); the "take chip back" button sat on top of the symbol button (moved into the stake row, still 44 px).
 - Roll sync: events reach every screen at once; the animation starts on receipt (no clock offset). Verified two browsers show the same result.
+
+## Phase 8 self-review (Jut Patti and Dhumbal)
+- Both share one table layout: opponents on top with card counts, stock and discard in the middle, your hand below. The Jut Patti indicator card is tucked sideways under the stock; jokers in your hand get a brass tab.
+- Dhumbal shows the last throw as a row you pick from and your own throw as a second row; Jhyap reveals every hand with the points added.
+- Generic: the center of both tables is quiet and plain. Candidate for Phase 11 polish (felt markings, a place for the indicator).
+- Fixed: Draw/Take tags overlapped the opponent seats in landscape (moved below the piles).

@@ -27,6 +27,11 @@ export interface HandProps {
   disabled?: boolean;
   /** card to highlight as a hint */
   hintId?: number | null;
+  /** several cards can be lifted at once (Dhumbal throws); taps call onToggle */
+  /** cards to flag with a small brass tab (jokers) */
+  marked?: ReadonlySet<number>;
+  selectedIds?: ReadonlySet<number>;
+  onToggle?: (id: number) => void;
   /** show backs instead of faces (pass-and-play while another player holds the device) */
   faceDown?: boolean;
 }
@@ -48,9 +53,11 @@ function HandCard({
   onDrop,
   disabled,
   hint,
+  marked,
   focusable,
 }: {
   hint: boolean;
+  marked: boolean;
   focusable: boolean;
   card: GameCard;
   content: ReactNode;
@@ -75,6 +82,7 @@ function HandCard({
       className={s.card}
       aria-pressed={selected}
       data-hint={hint}
+      data-marked={marked}
       aria-label={undefined}
       style={{ width: cardWidth, zIndex: z, transformOrigin: '50% 140%' }}
       initial={false}
@@ -109,6 +117,9 @@ export function Hand({
   gapAfter,
   disabled = false,
   hintId = null,
+  selectedIds,
+  onToggle,
+  marked,
   faceDown = false,
 }: HandProps) {
   const box = useRef<HTMLDivElement | null>(null);
@@ -175,7 +186,7 @@ export function Hand({
     >
       {placed.map(({ c, x, y, rot }, i) => {
         const playable = !playableIds || playableIds.has(c.id);
-        const selected = c.id === selectedId;
+        const selected = selectedIds ? selectedIds.has(c.id) : c.id === selectedId;
         return (
           <HandCard
             key={c.id}
@@ -192,10 +203,14 @@ export function Hand({
             dim={!!playableIds && !playable}
             selected={selected}
             hint={!faceDown && c.id === hintId}
-            focusable={selected || (selectedId === null && i === 0)}
+            marked={!faceDown && !!marked?.has(c.id)}
+            focusable={
+              selected || (!(selectedIds?.size ?? (selectedId === null ? 0 : 1)) && i === 0)
+            }
             disabled={disabled}
             onTap={() => {
               if (disabled) return;
+              if (onToggle) return onToggle(c.id);
               if (selected && playable) onPlay?.(c.id);
               else onSelect?.(c.id);
             }}
