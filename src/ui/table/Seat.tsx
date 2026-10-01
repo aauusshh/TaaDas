@@ -23,6 +23,8 @@ export interface SeatProps {
   auto?: boolean;
   conn?: ConnState;
   you?: boolean;
+  /** avatar and text side by side (compact layouts) */
+  row?: boolean;
   children?: ReactNode;
 }
 
@@ -72,7 +74,7 @@ export function Seat(p: SeatProps) {
   const t = useT();
   const ref = useAnchor(`seat:${p.seat}`);
   return (
-    <div className={s.seat} data-turn={p.isTurn} data-you={p.you}>
+    <div className={s.seat} data-turn={p.isTurn} data-you={p.you} data-row={p.row}>
       <div ref={ref} className={s.avatarWrap}>
         <TurnRing active={!!p.isTurn} timerMs={p.timerMs} totalMs={p.timerTotalMs} />
         <div className={s.avatar}>

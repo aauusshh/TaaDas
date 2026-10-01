@@ -13,7 +13,7 @@ for (const spec of specs) {
   page.on('pageerror', (e) => errors.push(String(e)));
   page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
   await page.goto(`${base}/#${route}`);
-  await page.waitForTimeout(700);
+  await page.waitForTimeout(Number(process.env.WAIT ?? 700));
   await page.screenshot({ path: `${out}/${name}.png`, fullPage: full === 'full' });
   console.log(name, errors.length ? 'ERRORS: ' + errors.join(' | ') : 'ok');
   await ctx.close();

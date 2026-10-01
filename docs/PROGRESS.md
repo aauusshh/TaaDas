@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 3 — Call Break (Phase 2 done)
+Phase 4 — Local modes (Phase 3 done)
 
 ## Branch
 dev
@@ -16,6 +16,8 @@ dev
 - Phase 1: engine core (rng, cards, deck, seats, events, types/GameDefinition, registry, sim CLI, LocalSession, highcard test game). 15 tests, sim 2000 games ok.
 
 - Phase 2: tokens + 4 themes, fonts, SVG card faces/backs/joker, RangiCard, Hand (fan, drag, keyboard), Piles, Seat+TurnRing, ChipStack, 16 avatars, anim queue + FlightLayer (WAAPI), SoundManager with synth fallback, settings/profile stores, i18n en/ne, Home, SettingsSheet, dev kit /dev/kit. Screenshots reviewed (docs/design-notes.md).
+
+- Phase 3: Call Break engine (rules, config, bot easy/medium/hard, view), 31 unit tests, sim 2000 games ok, table UI (TableShell, Ledger, ResultPanel, Petals, bid chips, last trick review, rules sheet), GameScreen at /play/:gameId. Full 5-round game auto-played through the UI at 360x740 with no console errors (e2e/playgame.mjs).
 
 ## Decisions and why
 - Newer toolchain than the spec assumed (Vite 8, TS 6, vitest 5, react-router 7, zod 4, motion 13). Used as installed.
@@ -32,8 +34,13 @@ dev
 - Nepali strings are my draft; owner reviews in Phase 11 step.
 - Dev server was left running in background for screenshots; stop it with the final phase.
 
+- Table screens receive TableProps and animate via useAnimatedView (shown view trails real view until animations land).
+- Round end actors are human seats only so bots never skip the result panel; with no humans seat 0 advances (sims).
+- Call Break UI uses a launch store (app/launch.ts); Phase 4 setup sheet fills it.
+- Manual drag-reorder of hand not built yet; autoSort setting sorts by suit.
+
 ## Next step
-Phase 3 per SPEC section 16 (read rules/callbreak, SPEC 10, 11).
+Phase 4 per SPEC section 16 (SPEC 5, 9, 10): setup sheet from configSchema, presets, pass-and-play cover, profile, stats, save/resume.
 
 ## Questions for owner
 Answer under each question. Claude uses the default until answered.

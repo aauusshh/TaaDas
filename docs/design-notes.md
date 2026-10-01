@@ -17,3 +17,10 @@
 - Fixed: landscape objects were too wide, narrowed so more fit beside the join panel.
 - Fixed: no CSS drop-shadow filters on cards (perf), box-shadow only.
 - Next: add paper ledger and table layout in Phase 3; revisit avatars and court emblem detail in Phase 11.
+
+## Phase 3 self-review (Call Break at 360x740 and 740x360)
+- Reads as a card table: fanned hand, stacked-back opponents, brass-ring turn indicator, paper ledger on round end.
+- Generic: bid chips are plain circles; opponent seats are small but fine.
+- Fixed: hand was clipped by the rounded corner and bottom edge; landscape bid panel pushed the hand off screen (bid now overlays the empty center).
+- Fixed: seat info separated into score (muted) and won/bid pill (brass).
+- Deal uses a 40 ms stagger (spec says 70) so a 52-card deal stays under 3 s.

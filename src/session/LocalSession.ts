@@ -8,6 +8,7 @@ import {
   type GameResult,
   type PlayerInfo,
 } from '../engine/core/types';
+import { useSettings } from '../storage/settings';
 import type { Session, SessionUpdate, Snapshot } from './types';
 
 export interface LocalSessionOptions {
@@ -20,11 +21,15 @@ export interface LocalSessionOptions {
   onSave?: (snapshot: Snapshot) => void;
 }
 
-const defaultThink = (d: Difficulty) =>
-  500 + Math.floor(Math.random() * (d === 'easy' ? 700 : 1100));
+/** 500-1600 ms, shorter when the player runs animations faster. */
+const defaultThink = (d: Difficulty) => {
+  const base = 500 + Math.floor(Math.random() * (d === 'easy' ? 700 : 1100));
+  return Math.round(base / useSettings.getState().animSpeed);
+};
 
 /** Runs the engine in this browser: bots plus humans sharing the device. */
 export class LocalSession implements Session {
+  private paused = false;
   readonly gameId;
   readonly players: PlayerInfo[];
   private game: AnyGame;
@@ -90,6 +95,16 @@ export class LocalSession implements Session {
     this.pump();
   }
 
+  pause() {
+    this.paused = true;
+    for (const t of this.timers.values()) clearTimeout(t);
+    this.timers.clear();
+  }
+  resume() {
+    this.paused = false;
+    this.pump();
+  }
+
   getView(seat: ViewerSeat) {
     return this.game.view(this.state, seat);
   }
@@ -144,7 +159,7 @@ export class LocalSession implements Session {
   }
 
   private pump() {
-    if (this.disposed || this.result()) return;
+    if (this.disposed || this.paused || this.result()) return;
     for (const seat of this.currentActors()) {
       if (!this.isBotSeat(seat) || this.timers.has(seat)) continue;
       const delay = this.think(this.players[seat].difficulty);
@@ -159,7 +174,7 @@ export class LocalSession implements Session {
   }
 
   private botMove(seat: number) {
-    if (this.disposed || !this.currentActors().includes(seat)) return;
+    if (this.disposed || this.paused || !this.currentActors().includes(seat)) return;
     const legal = this.legalActions(seat);
     if (legal.length === 0) return;
     const action = this.game.bot(

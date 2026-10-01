@@ -19,6 +19,13 @@ export interface Session<V = unknown, A = unknown> {
   submit(seat: number, action: A): void;
   result(): GameResult | null;
   subscribe(fn: (u: SessionUpdate) => void): () => void;
+  /** bots start acting; safe to call more than once */
+  start(): void;
+  /** local games: stop bots while a menu is open */
+  pause(): void;
+  resume(): void;
+  /** events from setup (the deal), for the first animation */
+  readonly initialEvents: GameEvent[];
   dispose(): void;
 }
 

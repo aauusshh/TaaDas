@@ -19,6 +19,8 @@ export interface HandProps {
   /** extra space inserted after these card ids (grouped sets in Marriage) */
   gapAfter?: ReadonlySet<number>;
   disabled?: boolean;
+  /** card to highlight as a hint */
+  hintId?: number | null;
 }
 
 const SPREAD_DEG = 12;
@@ -36,7 +38,9 @@ function HandCard({
   onTap,
   onDrop,
   disabled,
+  hint,
 }: {
+  hint: boolean;
   card: Card;
   x: number;
   y: number;
@@ -58,6 +62,7 @@ function HandCard({
       type="button"
       className={s.card}
       aria-pressed={selected}
+      data-hint={hint}
       aria-label={undefined}
       style={{ width: cardWidth, zIndex: z, transformOrigin: '50% 140%' }}
       initial={false}
@@ -89,6 +94,7 @@ export function Hand({
   seat,
   gapAfter,
   disabled = false,
+  hintId = null,
 }: HandProps) {
   const box = useRef<HTMLDivElement | null>(null);
   const anchor = useAnchor(`hand:${seat ?? 0}`);
@@ -106,7 +112,8 @@ export function Hand({
   const n = cards.length;
   const gap = gapAfter ? cards.filter((c, i) => gapAfter.has(c.id) && i < n - 1).length * 10 : 0;
   const ideal = cardWidth * 0.4;
-  const step = n > 1 ? Math.min(ideal, (w - cardWidth - gap) / (n - 1)) : 0;
+  const pad = 10;
+  const step = n > 1 ? Math.min(ideal, (w - 2 * pad - cardWidth - gap) / (n - 1)) : 0;
   const total = step * (n - 1) + cardWidth + gap;
   const startX = (w - total) / 2;
   const height = cardWidth / 0.7159;
@@ -146,7 +153,7 @@ export function Hand({
         anchor(el);
       }}
       className={s.hand}
-      style={{ height: height + 28 }}
+      style={{ height: height + 40 }}
       role="group"
       aria-label="Your hand"
       onKeyDown={onKey}
@@ -159,13 +166,14 @@ export function Hand({
             key={c.id}
             card={c}
             x={x}
-            y={y + 22}
+            y={y + 16}
             rot={rot}
             z={selected ? 60 : i}
             cardWidth={cardWidth}
             lifted={selected ? 16 : playableIds && playable ? 6 : 0}
             dim={!!playableIds && !playable}
             selected={selected}
+            hint={c.id === hintId}
             disabled={disabled}
             onTap={() => {
               if (disabled) return;

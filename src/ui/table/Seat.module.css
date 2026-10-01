@@ -122,16 +122,30 @@
   font-size: 12px;
   color: var(--panel-muted);
   display: flex;
+  align-items: center;
   gap: 6px;
 }
 .value b {
-  font-weight: 700;
-  color: var(--brass-light);
+  font-weight: 600;
 }
 .value i {
   font-style: normal;
+  font-weight: 700;
+  padding: 0 6px;
+  border-radius: 3px;
+  background: rgb(0 0 0 / 0.32);
+  color: var(--brass-light);
 }
 
 .seat[data-turn='true'] .name {
   color: var(--brass-light);
+}
+
+.seat[data-row='true'] {
+  flex-direction: row;
+  max-width: none;
+  gap: 8px;
+}
+.seat[data-row='true'] .text {
+  align-items: flex-start;
 }

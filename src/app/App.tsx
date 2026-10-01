@@ -7,6 +7,7 @@ import { initSettings } from '../storage/settings';
 import { sound } from '../ui/sound/SoundManager';
 import { Home } from './Home';
 import { DevKit } from './DevKit';
+import { GameScreen } from './GameScreen';
 
 function Placeholder({ text }: { text: string }) {
   return (
@@ -37,6 +38,7 @@ export function App() {
       <FlightLayer>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/play/:gameId" element={<GameScreen />} />
           <Route
             path="/join/:code"
             element={<Placeholder text="Online rooms arrive in a later build." />}

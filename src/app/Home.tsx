@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { availableGameIds } from '../engine/registry';
 import { Settings as SettingsIcon } from 'lucide-react';
 import { brand } from '../config/brand';
 import { useT } from '../i18n/t';
@@ -111,7 +112,13 @@ export function Home() {
         {open && (
           <>
             <p style={{ marginTop: 0 }}>{t(`game.${open}.blurb`)}</p>
-            <p style={{ color: 'var(--panel-muted)' }}>{t('home.comingSoon')}</p>
+            {availableGameIds().includes(open as never) ? (
+              <Button tone="primary" onClick={() => nav('/play/' + open)}>
+                {t('common.play')}
+              </Button>
+            ) : (
+              <p style={{ color: 'var(--panel-muted)' }}>{t('home.comingSoon')}</p>
+            )}
           </>
         )}
       </BottomSheet>

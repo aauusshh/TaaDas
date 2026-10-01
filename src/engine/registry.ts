@@ -5,6 +5,7 @@ type Loader = () => Promise<AnyGame>;
 /** Each game is lazy-loaded so the first screen stays small. Add new games here. */
 const loaders: Partial<Record<GameId, Loader>> = {
   highcard: async () => (await import('./games/highcard')).highCard,
+  callbreak: async () => (await import('./games/callbreak')).callBreak,
 };
 
 export const registerGame = (id: GameId, loader: Loader) => {
