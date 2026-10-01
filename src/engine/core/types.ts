@@ -93,6 +93,12 @@ export interface GameDefinition<
   timeoutAction(state: S, seat: number): A;
   result(state: S): GameResult | null;
   bot(view: V, legal: A[], difficulty: Difficulty, rng: Rng): A;
+  /** everyone plays on one shared screen (no pass-and-play cover) */
+  sharedScreen?: boolean;
+  /** config the setup screen forces for a play mode (e.g. the house banks when playing alone) */
+  modeConfig?(mode: 'bots' | 'local' | 'online'): Partial<C>;
+  /** seats whose turn timer runs now (default: the first actor) */
+  timerSeats?(state: S): number[];
   /** false between rounds and at game end: no turn timer, no pass-and-play cover (default true) */
   isPlayPhase?(state: S): boolean;
   /** sim only: return a message when state is inconsistent (card count, chip total, ...) */

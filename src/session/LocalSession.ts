@@ -216,6 +216,7 @@ export class LocalSession implements Session {
       return;
     }
     const playPhase = this.isPlayPhase();
+    const timerSeats = this.game.timerSeats ? this.game.timerSeats(this.state) : actors.slice(0, 1);
     for (const seat of actors) {
       if (this.isBotSeat(seat)) {
         if (!playPhase && this.players[seat].isBot === false) continue;
@@ -228,7 +229,7 @@ export class LocalSession implements Session {
             this.botMove(seat);
           }, delay),
         );
-      } else if (this.timerMs > 0 && playPhase && seat === actors[0]) {
+      } else if (this.timerMs > 0 && playPhase && timerSeats.includes(seat)) {
         this.armHumanTimer(seat);
       }
     }

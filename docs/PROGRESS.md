@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 7 — Langur Burja (Phase 6 done)
+Phase 8 — Dhumbal + Jut Patti (Phase 7 done)
 
 ## Branch
 dev
@@ -24,6 +24,8 @@ dev
 - Phase 5: net layer (zod protocol, Transport interface, in-memory + PeerJS transports, room codes), HostSession/ClientSession, lobby (QR, share, seats, bots, kick, lock, timer, rules), join screen, reconnect with token, Auto seats, host resume, wake lock, reactions, connection dots. 46 tests incl. leak check over the wire. e2e/online.mjs (two browsers via PeerJS cloud) passes: 3 plays each, no hidden card leaked, same seat after reload.
 
 - Phase 6: Rangi engine (108-card deck, legality, challenge, Ek/Caught window, stacking, seven-zero, jump-in, draw-until-play, must-play, scoring), bots easy/medium/hard, RangiCard art to the rules file (sindoor/marigold/sky/leaf, symbols, palm, mandala), table UI with color/swap pickers and challenge dialog, rules sheet. 26 Rangi tests, sim 2000 ok, full round auto-played at 360x740 and 740x360.
+
+- Phase 7: Langur Burja engine (bets, close, roll, settle, payout table config, banker rotation, house banker for solo), bots, brass bowl + 3D dice + cloth mat UI, device-sharing mode (banker holds the phone), online synced roll verified with two browsers, profile chips follow solo results. 11 tests, sim ok.
 
 ## Decisions and why
 - Newer toolchain than the spec assumed (Vite 8, TS 6, vitest 5, react-router 7, zod 4, motion 13). Used as installed.
@@ -59,8 +61,12 @@ dev
 - Progressive drawing in the rules file is treated as the stacking option (owner question added).
 - LocalSession arms the turn timer only for the first actor in currentActors.
 
+- Banker balance may go negative (house is not capped); bettors cannot stake more than they hold.
+- GameDefinition got optional hooks: modeConfig (house banks when solo), timerSeats, sharedScreen (no pass cover).
+- Solo stake comes from the profile chips; the profile gains or loses the human's net at game end.
+
 ## Next step
-Phase 7 per SPEC section 16 (rules/langur-burja): dice, bowl, mat, betting UI, banker logic, single/local/online.
+Phase 8 per SPEC section 16 (rules/dhumbal, rules/jut-patti): shared draw/discard table, both engines + bots.
 
 ## Questions for owner
 Answer under each question. Claude uses the default until answered.

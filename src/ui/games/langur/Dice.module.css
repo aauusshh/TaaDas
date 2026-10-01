@@ -1,0 +1,23 @@
+.scene {
+  perspective: 420px;
+  flex: none;
+}
+.cube {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.9s cubic-bezier(0.18, 0.8, 0.25, 1);
+}
+.face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 18%;
+  background: #f6efdc;
+  box-shadow:
+    inset 0 0 0 1px #cdbf9c,
+    inset 0 -3px 6px rgb(120 90 40 / 0.18);
+  backface-visibility: hidden;
+}

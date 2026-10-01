@@ -250,10 +250,19 @@ function SetupBody({
       names: players.filter((p) => p.isBot).map((p) => p.name),
     });
     saveSetup(game.id, { mode, count: seats, timerSec, hints, difficulty, config });
+    const forced: GameConfig = { ...config, ...(game.modeConfig?.(mode) ?? {}) };
+    if (game.id === 'langurburja' && mode === 'bots') {
+      forced.startChips = Math.max(500, useProfile.getState().chips);
+      players[players.length - 1] = {
+        ...players[players.length - 1],
+        name: t('lb.house'),
+        avatar: 'bell',
+      };
+    }
     setLaunch({
       gameId: game.id,
       players,
-      config,
+      config: forced,
       hints: mode === 'bots' && hints,
       timerSec,
       mode,

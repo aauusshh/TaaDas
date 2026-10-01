@@ -7,6 +7,7 @@ import { useT } from '../i18n/t';
 export const tables: Partial<Record<GameId, ComponentType<TableProps>>> = {
   callbreak: lazy(() => import('../ui/games/callbreak/CallBreakTable')),
   rangi: lazy(() => import('../ui/games/rangi/RangiTable')),
+  langurburja: lazy(() => import('../ui/games/langur/LangurTable')),
 };
 
 export function Loading() {

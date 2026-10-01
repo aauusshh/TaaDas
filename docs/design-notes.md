@@ -39,3 +39,9 @@
 - Cards: full-bleed color, rounded-square window (not an oval), Rozha numeral, faint dhaka diamonds at about 8%, corner symbols (sun, flower, mountain, leaf), raised-palm Skip, mandala Wild. Deck pile has stacked paper edges.
 - Generic: the table is clean but plain; opponents are just avatars and counts.
 - Fixed: in landscape the opponent counts hid behind the draw pile; opponents now use a row layout and the Draw tag sits below the pile.
+
+## Phase 7 self-review (Langur Burja, 360x740 and 740x360)
+- Cloth mat in maroon with a dashed brass border and cream printed squares, brass bowl with a lid seen from above, ivory 3D dice with SVG faces. Reads as objects on a table.
+- Generic: chip tray and buttons are the standard components.
+- Fixed: seats overlapped the bowl (flex shrink); dice showed crowns before the roll (hidden until the lid lifts); the "take chip back" button sat on top of the symbol button (moved into the stake row, still 44 px).
+- Roll sync: events reach every screen at once; the animation starts on receipt (no clock offset). Verified two browsers show the same result.

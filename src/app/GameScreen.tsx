@@ -7,6 +7,7 @@ import type { Session } from '../session/types';
 import { PassCover } from '../ui/table/PassCover';
 import { clearSave, loadSave, writeSave } from '../storage/saves';
 import { useStats } from '../storage/stats';
+import { useProfile } from '../storage/profile';
 import { quickStart, useLaunch, type Launch } from './launch';
 import { Loading, tables } from './tables';
 
@@ -64,6 +65,10 @@ export function GameScreen() {
       if (!r || recorded) return;
       recorded = true;
       clearSave();
+      if (r.chipDelta && launch.mode === 'bots') {
+        const you = s.players.findIndex((p) => !p.isBot);
+        if (you >= 0) useProfile.getState().addChips(r.chipDelta[you]);
+      }
       for (let seat = 0; seat < s.players.length; seat++) {
         if (!s.players[seat].isBot) useStats.getState().record(id, r.winners.includes(seat));
       }
@@ -83,7 +88,7 @@ export function GameScreen() {
     () => players.map((p, i) => (p.isBot ? -1 : i)).filter((i) => i >= 0),
     [players],
   );
-  const multi = humans.length > 1;
+  const multi = humans.length > 1 && !game?.sharedScreen;
   const [viewSeat, setViewSeat] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [tick, bump] = useState(0);

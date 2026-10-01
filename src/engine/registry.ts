@@ -7,6 +7,7 @@ const loaders: Partial<Record<GameId, Loader>> = {
   highcard: async () => (await import('./games/highcard')).highCard,
   callbreak: async () => (await import('./games/callbreak')).callBreak,
   rangi: async () => (await import('./games/rangi')).rangi,
+  langurburja: async () => (await import('./games/langurburja')).langurBurja,
 };
 
 export const registerGame = (id: GameId, loader: Loader) => {
