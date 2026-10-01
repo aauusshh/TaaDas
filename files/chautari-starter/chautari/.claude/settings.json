@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(node_modules/**)",
+      "Read(dist/**)",
+      "Read(coverage/**)",
+      "Read(**/*.min.js)",
+      "Read(**/*.map)",
+      "Read(package-lock.json)",
+      "Read(.env)",
+      "Read(.env.*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(rm -rf:*)",
+      "Bash(gh repo:*)"
+    ]
+  }
+}
