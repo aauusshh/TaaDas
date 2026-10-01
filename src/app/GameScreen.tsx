@@ -1,28 +1,14 @@
-import { Suspense, lazy, useEffect, useMemo, useState, type ComponentType } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { loadGame } from '../engine/registry';
 import type { AnyGame, GameId } from '../engine/core/types';
 import { LocalSession } from '../session/LocalSession';
 import type { Session } from '../session/types';
-import type { TableProps } from '../ui/games/types';
 import { PassCover } from '../ui/table/PassCover';
 import { clearSave, loadSave, writeSave } from '../storage/saves';
 import { useStats } from '../storage/stats';
 import { quickStart, useLaunch, type Launch } from './launch';
-import { useT } from '../i18n/t';
-
-const tables: Partial<Record<GameId, ComponentType<TableProps>>> = {
-  callbreak: lazy(() => import('../ui/games/callbreak/CallBreakTable')),
-};
-
-function Loading() {
-  const t = useT();
-  return (
-    <main style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }}>
-      {t('common.loading')}
-    </main>
-  );
-}
+import { Loading, tables } from './tables';
 
 export function GameScreen() {
   const { gameId } = useParams();
@@ -141,6 +127,8 @@ export function GameScreen() {
         players={players}
         hints={hints && !multi}
         handHidden={!canSee}
+        canRematch
+        online={false}
         onLeave={() => nav('/')}
         onRematch={() => {
           clearSave();

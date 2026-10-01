@@ -11,6 +11,9 @@ export interface TableProps {
   hints: boolean;
   /** several humans share this device and it is not this seat's turn: show backs */
   handHidden: boolean;
+  /** only the host can start another game online */
+  canRematch: boolean;
+  online: boolean;
   onLeave: () => void;
   onRematch: () => void;
 }

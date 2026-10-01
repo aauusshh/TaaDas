@@ -33,6 +33,12 @@ export interface Session<V = unknown, A = unknown> {
   isAuto(seat: number): boolean;
   /** put a seat on or off Auto (a bot plays for it) */
   setAuto(seat: number, on: boolean): void;
+  /** online sessions */
+  readonly mySeat?: number;
+  readonly generation?: number;
+  getConn?(seat: number): 'good' | 'slow' | 'away';
+  react?(id: string): void;
+  onReaction?(fn: (seat: number | 'spectator', id: string) => void): () => void;
   dispose(): void;
 }
 

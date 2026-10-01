@@ -9,22 +9,8 @@ import { Home } from './Home';
 import { DevKit } from './DevKit';
 import { GameScreen } from './GameScreen';
 import { ProfileScreen } from './ProfileScreen';
-
-function Placeholder({ text }: { text: string }) {
-  return (
-    <main
-      style={{
-        minHeight: '100dvh',
-        display: 'grid',
-        placeItems: 'center',
-        padding: 24,
-        textAlign: 'center',
-      }}
-    >
-      <p>{text}</p>
-    </main>
-  );
-}
+import { JoinScreen } from './JoinScreen';
+import { RoomScreen } from './RoomScreen';
 
 export function App() {
   useEffect(() => {
@@ -41,10 +27,8 @@ export function App() {
           <Route path="/" element={<Home />} />
           <Route path="/play/:gameId" element={<GameScreen />} />
           <Route path="/profile" element={<ProfileScreen />} />
-          <Route
-            path="/join/:code"
-            element={<Placeholder text="Online rooms arrive in a later build." />}
-          />
+          <Route path="/join/:code" element={<JoinScreen />} />
+          <Route path="/room/:code" element={<RoomScreen />} />
           {import.meta.env.DEV && <Route path="/dev/kit" element={<DevKit />} />}
           <Route path="*" element={<Home />} />
         </Routes>

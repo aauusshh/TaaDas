@@ -21,7 +21,8 @@ import {
 } from '../storage/saves';
 import { Button } from '../ui/components/Button';
 import { Segmented, Stepper, Toggle } from '../ui/components/Controls';
-import { BottomSheet, Dialog } from '../ui/components/Overlays';
+import { BottomSheet, Dialog, useToast } from '../ui/components/Overlays';
+import { createRoom } from './roomStore';
 import { AVATAR_IDS } from '../ui/components/Avatar';
 import { sound } from '../ui/sound/SoundManager';
 import { BOT_NAMES, useLaunch } from './launch';
@@ -46,7 +47,7 @@ function defaultRows(count: number, you: string, saved: string[], diff: Difficul
   }));
 }
 
-function FieldRow({
+export function FieldRow({
   field,
   value,
   onChange,
@@ -141,9 +142,12 @@ function SetupBody({
   savedNames: string[];
 }) {
   const t = useT();
+  const toast = useToast();
   const memory = useMemo(() => loadSetup(game.id), [game.id]);
   const fixed = game.minPlayers === game.maxPlayers;
-  const [mode, setMode] = useState<Mode>(memory?.mode === 'local' ? 'local' : 'bots');
+  const [mode, setMode] = useState<Mode>(
+    memory?.mode === 'local' || memory?.mode === 'online' ? memory.mode : 'bots',
+  );
   const [count, setCount] = useState(
     Math.min(
       game.maxPlayers,
@@ -195,9 +199,36 @@ function SetupBody({
   const seats = fixed ? game.maxPlayers : count;
   const active = rows.slice(0, seats);
   const humansCount = mode === 'bots' ? 1 : active.filter((r) => r.human).length;
-  const canStart = mode !== 'online' && humansCount >= 1;
+  const [busy, setBusy] = useState(false);
+  const canStart = mode === 'online' ? !busy : humansCount >= 1;
+
+  const createOnline = async () => {
+    setBusy(true);
+    try {
+      saveSetup(game.id, { mode, count: seats, timerSec, hints, difficulty, config });
+      const host = await createRoom({
+        gameId: game.id,
+        config,
+        seatCount: seats,
+        timerSec,
+        relay: false,
+      });
+      nav(`/room/${host.code}`);
+    } catch (e) {
+      const m = (e as Error).message;
+      toast.show(
+        m === 'timeout' ? t('room.err.timeout', { code: '' }) : t('room.createFailed'),
+        5000,
+      );
+      setBusy(false);
+    }
+  };
 
   const start = () => {
+    if (mode === 'online') {
+      void createOnline();
+      return;
+    }
     sound.play('place');
     const players: PlayerInfo[] = active.map((r, i) => {
       const human = mode === 'bots' ? i === 0 : r.human;
@@ -255,7 +286,10 @@ function SetupBody({
       <Segmented<Mode>
         label={t('setup.mode')}
         value={mode}
-        onChange={setMode}
+        onChange={(m) => {
+          setMode(m);
+          if (m === 'online' && timerSec === 0) setTimerSec(30);
+        }}
         options={[
           { value: 'bots', label: t('setup.mode.bots') },
           ...(game.supports.passAndPlay
@@ -267,9 +301,7 @@ function SetupBody({
         ]}
       />
 
-      {mode === 'online' ? (
-        <p className={s.note}>{t('setup.onlineSoon')}</p>
-      ) : (
+      {
         <>
           {!fixed && (
             <div className={s.field}>
@@ -286,51 +318,55 @@ function SetupBody({
             </div>
           )}
 
-          <h3 className={s.group}>{t('setup.players')}</h3>
-          <ul className={s.players}>
-            {active.map((r, i) => {
-              const human = mode === 'bots' ? i === 0 : r.human;
-              return (
-                <li key={i} className={s.player}>
-                  <input
-                    className={s.name}
-                    value={r.name}
-                    maxLength={16}
-                    aria-label={t('setup.nameOf', { n: i + 1 })}
-                    onChange={(e) => update(i, { name: e.target.value })}
-                  />
-                  {mode === 'local' && (
-                    <Segmented<string>
-                      label={t('setup.kind')}
-                      value={r.human ? 'human' : 'bot'}
-                      onChange={(v) => update(i, { human: v === 'human' })}
-                      options={[
-                        { value: 'human', label: t('setup.person') },
-                        { value: 'bot', label: t('common.bot') },
-                      ]}
-                    />
-                  )}
-                  {!human && (
-                    <Segmented<Difficulty>
-                      label={t('setup.difficulty')}
-                      value={r.difficulty}
-                      onChange={(v) => {
-                        update(i, { difficulty: v });
-                        setDifficulty(v);
-                      }}
-                      options={[
-                        { value: 'easy', label: t('diff.easy') },
-                        { value: 'medium', label: t('diff.medium') },
-                        { value: 'hard', label: t('diff.hard') },
-                      ]}
-                    />
-                  )}
-                  {human && mode === 'bots' && <span className={s.you}>{t('common.you')}</span>}
-                </li>
-              );
-            })}
-          </ul>
-          {humansCount < 1 && <p className={s.warn}>{t('setup.needPerson')}</p>}
+          {mode !== 'online' && (
+            <>
+              <h3 className={s.group}>{t('setup.players')}</h3>
+              <ul className={s.players}>
+                {active.map((r, i) => {
+                  const human = mode === 'bots' ? i === 0 : r.human;
+                  return (
+                    <li key={i} className={s.player}>
+                      <input
+                        className={s.name}
+                        value={r.name}
+                        maxLength={16}
+                        aria-label={t('setup.nameOf', { n: i + 1 })}
+                        onChange={(e) => update(i, { name: e.target.value })}
+                      />
+                      {mode === 'local' && (
+                        <Segmented<string>
+                          label={t('setup.kind')}
+                          value={r.human ? 'human' : 'bot'}
+                          onChange={(v) => update(i, { human: v === 'human' })}
+                          options={[
+                            { value: 'human', label: t('setup.person') },
+                            { value: 'bot', label: t('common.bot') },
+                          ]}
+                        />
+                      )}
+                      {!human && (
+                        <Segmented<Difficulty>
+                          label={t('setup.difficulty')}
+                          value={r.difficulty}
+                          onChange={(v) => {
+                            update(i, { difficulty: v });
+                            setDifficulty(v);
+                          }}
+                          options={[
+                            { value: 'easy', label: t('diff.easy') },
+                            { value: 'medium', label: t('diff.medium') },
+                            { value: 'hard', label: t('diff.hard') },
+                          ]}
+                        />
+                      )}
+                      {human && mode === 'bots' && <span className={s.you}>{t('common.you')}</span>}
+                    </li>
+                  );
+                })}
+              </ul>
+              {humansCount < 1 && <p className={s.warn}>{t('setup.needPerson')}</p>}
+            </>
+          )}
 
           <h3 className={s.group}>{t('setup.ruleSet')}</h3>
           <div className={s.presetRow}>
@@ -395,11 +431,11 @@ function SetupBody({
             </div>
           )}
         </>
-      )}
+      }
 
       <div className={s.footer}>
         <Button tone="primary" disabled={!canStart} onClick={start}>
-          {t('common.play')}
+          {mode === 'online' ? t('room.create') : t('common.play')}
         </Button>
       </div>
 

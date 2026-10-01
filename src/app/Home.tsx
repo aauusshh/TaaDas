@@ -10,6 +10,9 @@ import { Button } from '../ui/components/Button';
 import { BottomSheet } from '../ui/components/Overlays';
 import { SetupSheet } from './SetupSheet';
 import { loadSave } from '../storage/saves';
+import { loadHostRoom } from '../storage/rooms';
+import { resumeRoom } from './roomStore';
+import { useToast } from '../ui/components/Overlays';
 import { useLaunch } from './launch';
 import type { GameId } from '../engine/core/types';
 import { GameObject } from '../ui/table/GameObjects';
@@ -37,6 +40,9 @@ export function Home() {
   const [settings, setSettings] = useState(false);
   const [code, setCode] = useState('');
   const saved = useMemo(() => loadSave(), []);
+  const hostRoom = useMemo(() => loadHostRoom(), []);
+  const toast = useToast();
+  const [resuming, setResuming] = useState(false);
   const setLaunch = useLaunch((l) => l.set);
 
   return (
@@ -88,6 +94,33 @@ export function Home() {
       </main>
 
       <footer className={s.join}>
+        {hostRoom && (
+          <Button
+            tone="primary"
+            className={s.continue}
+            disabled={resuming}
+            onClick={async () => {
+              setResuming(true);
+              try {
+                let host = null;
+                for (let i = 0; i < 6 && !host; i++) {
+                  try {
+                    host = await resumeRoom();
+                  } catch (e) {
+                    if ((e as Error).message !== 'code-taken' || i === 5) throw e;
+                    await new Promise((r) => setTimeout(r, 4000));
+                  }
+                }
+                if (host) nav('/room/' + host.code);
+              } catch {
+                toast.show(t('room.createFailed'), 5000);
+                setResuming(false);
+              }
+            }}
+          >
+            {t('room.resume', { code: hostRoom.code })}
+          </Button>
+        )}
         {saved && (
           <Button
             tone="primary"

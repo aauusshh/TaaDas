@@ -176,7 +176,9 @@ export class LocalSession implements Session {
 
   subscribe(fn: (u: SessionUpdate) => void) {
     this.listeners.add(fn);
-    return () => this.listeners.delete(fn);
+    return () => {
+      this.listeners.delete(fn);
+    };
   }
 
   submit(seat: number, action: unknown) {

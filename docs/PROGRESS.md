@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 5 — Online (Phase 4 done)
+Phase 6 — Rangi (Phase 5 done)
 
 ## Branch
 dev
@@ -20,6 +20,8 @@ dev
 - Phase 3: Call Break engine (rules, config, bot easy/medium/hard, view), 31 unit tests, sim 2000 games ok, table UI (TableShell, Ledger, ResultPanel, Petals, bid chips, last trick review, rules sheet), GameScreen at /play/:gameId. Full 5-round game auto-played through the UI at 360x740 with no console errors (e2e/playgame.mjs).
 
 - Phase 4: setup sheet from configSchema (modes bots/same device, player count, names, bot level, presets + saved house rules, timer, hints), turn timer with Auto seat after 2 timeouts, pass-and-play cover and face-down hands, profile screen + stats, save/resume with Continue game, haptics helper. 36 tests. e2e/local.mjs verified setup, cover, resume.
+
+- Phase 5: net layer (zod protocol, Transport interface, in-memory + PeerJS transports, room codes), HostSession/ClientSession, lobby (QR, share, seats, bots, kick, lock, timer, rules), join screen, reconnect with token, Auto seats, host resume, wake lock, reactions, connection dots. 46 tests incl. leak check over the wire. e2e/online.mjs (two browsers via PeerJS cloud) passes: 3 plays each, no hidden card leaked, same seat after reload.
 
 ## Decisions and why
 - Newer toolchain than the spec assumed (Vite 8, TS 6, vitest 5, react-router 7, zod 4, motion 13). Used as installed.
@@ -45,8 +47,13 @@ dev
 - Setup keeps per-game memory (setup.<game>) and house rules (house.<game>) in localStorage.
 - Online tab in setup shows a placeholder until Phase 5.
 
+- Join dedupe: a module-level map prevents React StrictMode from taking two seats.
+- Host persists room to localStorage (online.host); Home shows Reopen room; PeerJS cloud may need up to ~20 s to free the old id so resume retries.
+- Spectator view uses seat 0 layout (status text may say Your turn when seat 0 acts); polish later.
+- Dev-only hooks window.__host/__client/__netLog exist for the e2e test (DEV builds only).
+
 ## Next step
-Phase 5 per SPEC section 16 (SPEC 6, 7): net layer (zod protocol, transport interface, PeerJS), host/client sessions, lobby, QR/share, reconnect, Auto seats, wake lock, reactions.
+Phase 6 per SPEC section 16 (rules/rangi): deck art is done (RangiCard); build engine, bots, house rules, UI, all modes.
 
 ## Questions for owner
 Answer under each question. Claude uses the default until answered.

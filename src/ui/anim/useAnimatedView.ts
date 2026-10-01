@@ -40,7 +40,7 @@ export function useAnimatedView<V>(
       void queue.enqueue(async () => {
         try {
           await runRef.current({ events: filtered, prev: current, next });
-          if (markInitial) initialPlayed.add(session);
+          if (markInitial) initialPlayed.add(session.initialEvents);
         } finally {
           current = next;
           setShown(next);
@@ -49,7 +49,7 @@ export function useAnimatedView<V>(
         }
       });
     };
-    const first = !initialPlayed.has(session);
+    const first = !initialPlayed.has(session.initialEvents);
     handle(first ? session.initialEvents : [], first);
     const unsub = session.subscribe((u) => handle(u.events));
     session.start();

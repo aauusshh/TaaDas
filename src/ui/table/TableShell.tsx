@@ -5,6 +5,7 @@ import { useT } from '../../i18n/t';
 import { BottomSheet, ConfirmDialog } from '../components/Overlays';
 import { Button } from '../components/Button';
 import { SettingsSheet } from '../../app/SettingsSheet';
+import { ReactionBubbles, ReactionButton } from './Reactions';
 import s from './TableShell.module.css';
 
 /**
@@ -57,6 +58,7 @@ export function TableShell({
         >
           <MenuIcon size={22} aria-hidden="true" />
         </button>
+        <ReactionButton session={session} />
         <button
           type="button"
           className={`${s.corner} ${s.right}`}
@@ -66,6 +68,7 @@ export function TableShell({
           <BookOpen size={22} aria-hidden="true" />
         </button>
       </div>
+      <ReactionBubbles session={session} />
       {overlay}
 
       <BottomSheet open={menu} onClose={closeMenu} title={t('table.menu')}>

@@ -29,3 +29,8 @@
 - Setup sheet is built from configSchema: groups, steppers, toggles, segmented selects, preset dropdown plus saved house rules.
 - Pass-and-play: full-screen "Pass to <name>" cover; hands show backs whenever the viewing seat is not the actor; tab-hide re-covers.
 - Reload resumes via a saved snapshot (Home shows Continue game); finished games clear the save.
+
+## Phase 5 notes
+- Online lobby: big room code in the display face, QR, Share/Copy link, seats as rows (host controls inline), ready states with connection dots.
+- Lobby rows for empty seats are tall; compress in the Phase 11 polish pass.
+- Reactions: 6 phrases + 6 emoji (emoji only here), bubble appears over the sender's seat.

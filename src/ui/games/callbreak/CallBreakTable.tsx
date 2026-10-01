@@ -65,6 +65,8 @@ export default function CallBreakTable({
   players,
   hints,
   handHidden,
+  canRematch,
+  online,
   onLeave,
   onRematch,
 }: TableProps) {
@@ -268,6 +270,7 @@ export default function CallBreakTable({
       value={view ? view.totals[seat] : 0}
       info={seatInfo(seat)}
       auto={session.isAuto(seat)}
+      conn={online ? session.getConn?.(seat) : undefined}
       timerMs={timerFor(seat)?.remainingMs}
       timerTotalMs={timerFor(seat)?.totalMs}
       isTurn={
@@ -343,9 +346,13 @@ export default function CallBreakTable({
               note={t('app.chipsNote')}
               actions={
                 <>
-                  <Button tone="primary" onClick={onRematch}>
-                    {t('common.rematch')}
-                  </Button>
+                  {canRematch ? (
+                    <Button tone="primary" onClick={onRematch}>
+                      {t('common.rematch')}
+                    </Button>
+                  ) : (
+                    <span className={s.round}>{t('room.waitRematch')}</span>
+                  )}
                   <Button onClick={onLeave}>{t('common.home')}</Button>
                 </>
               }
