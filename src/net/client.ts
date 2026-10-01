@@ -171,7 +171,7 @@ export class ClientSession implements Session {
   }
 
   private onRaw(raw: string) {
-    if (import.meta.env.DEV) {
+    if (import.meta.env.DEV && typeof window !== 'undefined') {
       const w = window as unknown as { __netLog?: string[] };
       (w.__netLog ??= []).push(raw);
     }
