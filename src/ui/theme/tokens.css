@@ -1,0 +1,19 @@
+@import '@fontsource/mukta/400.css';
+@import '@fontsource/mukta/600.css';
+@import '@fontsource/rozha-one/400.css';
+
+:root {
+  --felt: #14402f;
+  --felt-deep: #0d2c20;
+  --cream: #f3ead6;
+  --font-ui: 'Mukta', system-ui, sans-serif;
+  --font-display: 'Rozha One', serif;
+}
+
+html,
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at 50% 30%, var(--felt), var(--felt-deep));
+  color: var(--cream);
+  font-family: var(--font-ui);
+}

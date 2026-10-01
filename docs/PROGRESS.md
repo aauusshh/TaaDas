@@ -1,23 +1,25 @@
 # Progress
 
 ## Current phase
-Phase 0 — Setup (not started)
+Phase 1 — Engine core (Phase 0 done)
 
 ## Branch
 dev
 
 ## Owner decisions
-- Hosting: <GitHub Pages (public repo) | Cloudflare Pages (private repo)>  ← owner fills in
+- Hosting: GitHub Pages, repo TaaDas, VITE_BASE=/TaaDas/ (set in deploy workflow and .env.example)
 - App name: Chautari (working name, change in src/config/brand.ts)
 
 ## Done
-(nothing yet)
+- Phase 0: Vite+React+TS strict, eslint (bans Math.random in engine), prettier, vitest, folder tree, brand.ts, env.ts, featureFlags.ts, deploy workflow, felt placeholder. lint/typecheck/test/build pass.
 
 ## Decisions and why
-(Claude adds short entries: decision — reason)
+- Newer toolchain than the spec assumed (Vite 8, TS 6, vitest 5, react-router 7, zod 4, motion 13). Used as installed.
+- vite-plugin-pwa installed but configured in Phase 11.
+- Build script runs tsc --noEmit before vite build.
 
 ## Next step
-Phase 0 per SPEC section 16.
+Phase 1 per SPEC section 16.
 
 ## Questions for owner
 Answer under each question. Claude uses the default until answered.
