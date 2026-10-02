@@ -1,0 +1,44 @@
+.table {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+}
+.deck {
+  position: relative;
+  flex: none;
+  border-radius: 5.7% / 4.1%;
+  box-shadow:
+    1.5px 1.5px 0 #fbf8f1,
+    3px 3px 0 #123,
+    5px 6px 3px rgb(0 0 0 / 0.5);
+}
+.deckCount {
+  position: absolute;
+  right: -6px;
+  bottom: -8px;
+}
+.slot {
+  flex: none;
+  border: 2px dashed rgb(244 241 232 / 0.3);
+  border-radius: 6px;
+  background: rgb(0 0 0 / 0.14);
+  overflow: hidden;
+}
+.slot > svg {
+  border-radius: 5.7% / 4.1%;
+}
+.slot[data-third] {
+  border-color: var(--brass);
+}
+.amountRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.quick {
+  display: flex;
+  gap: 2px;
+}

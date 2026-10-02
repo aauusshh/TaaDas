@@ -1,0 +1,98 @@
+.arrange {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.row {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  background: rgb(0 0 0 / 0.2);
+  border-radius: 8px;
+}
+.rowLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--panel-muted);
+}
+.slots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+.slot {
+  padding: 0;
+  border: 2px dashed rgb(244 241 232 / 0.35);
+  border-radius: 6px;
+  background: rgb(0 0 0 / 0.18);
+  cursor: pointer;
+  flex: none;
+  overflow: hidden;
+}
+.slot[data-empty='false'] {
+  border: 0;
+  border-radius: 5.7% / 4.1%;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.55);
+}
+.slot:disabled {
+  cursor: default;
+}
+.cat {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brass-light);
+  min-width: 62px;
+  text-align: right;
+}
+
+.tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  padding: 6px 2px 2px;
+}
+.trayCard {
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 5.7% / 4.1%;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.55);
+  cursor: pointer;
+}
+.trayCard[data-sel='true'] {
+  transform: translateY(-8px);
+  box-shadow:
+    0 0 0 3px var(--brass-light),
+    0 1px 2px rgb(0 0 0 / 0.55);
+}
+
+.showBlock {
+  padding: 4px 0 6px;
+  border-bottom: 1px dashed rgb(244 241 232 / 0.16);
+}
+.showHead {
+  font-size: 13px;
+  color: var(--panel-muted);
+  margin-bottom: 2px;
+}
+.showHead b {
+  color: var(--brass-light);
+}
+.showRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.showRow[data-win='true'] {
+  background: rgb(184 137 58 / 0.22);
+}
+.mini {
+  display: flex;
+  gap: 3px;
+}

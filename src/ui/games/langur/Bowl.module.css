@@ -1,0 +1,50 @@
+.bowl {
+  flex: none;
+}
+.bowl[data-state='shaking'] {
+  animation: shake 1.2s ease-in-out;
+}
+.lid {
+  transform-origin: 65px 64px;
+  transition:
+    transform 0.3s var(--ease-out),
+    opacity 0.3s;
+}
+.bowl[data-state='lifted'] .lid {
+  transform: translateY(-34px) scale(1.12);
+  opacity: 0;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  8% {
+    transform: translate(-5px, 2px) rotate(-4deg);
+  }
+  16% {
+    transform: translate(5px, -2px) rotate(4deg);
+  }
+  24% {
+    transform: translate(-4px, 3px) rotate(-3deg);
+  }
+  32% {
+    transform: translate(4px, -3px) rotate(3deg);
+  }
+  44% {
+    transform: translate(-5px, 1px) rotate(-4deg);
+  }
+  56% {
+    transform: translate(5px, 2px) rotate(4deg);
+  }
+  68% {
+    transform: translate(-3px, -2px) rotate(-2deg);
+  }
+  80% {
+    transform: translate(3px, 2px) rotate(2deg);
+  }
+  92% {
+    transform: translate(-1px, 0) rotate(-1deg);
+  }
+}

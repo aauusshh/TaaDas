@@ -1,0 +1,73 @@
+# Design notes
+
+## Reference study (no web access, so section 8.3 conventions used)
+- Real tables: cards overlap about 40%, fan is shallow, piles show thickness.
+- Seats are small: avatar, name, one number. Anything more is noise on a phone.
+- Turn is signaled by the ring on the avatar draining, not by banners.
+- Scores belong on paper (ledger), away from the table surface.
+- Deal is staggered; one shuffle sound, then flicks.
+- Wins get one short celebration at game end only.
+- Opponent hands are stacked backs with a count, not fanned.
+- Menus are objects on the table (cards, bowl) with paper tags for names.
+
+## Phase 2 self-review (360x740, 740x360, 1366x768)
+- Would a player think a person designed this? Home reads as a table with things laid on it; card faces have our own courts (crown, lotus, topi). Yes, mostly.
+- Generic: sheets, buttons and the settings list still look standard; avatars are simple glyphs.
+- Fixed: Home showed one game per row in portrait (object width too wide), now two per row with offset drops.
+- Fixed: landscape objects were too wide, narrowed so more fit beside the join panel.
+- Fixed: no CSS drop-shadow filters on cards (perf), box-shadow only.
+- Next: add paper ledger and table layout in Phase 3; revisit avatars and court emblem detail in Phase 11.
+
+## Phase 3 self-review (Call Break at 360x740 and 740x360)
+- Reads as a card table: fanned hand, stacked-back opponents, brass-ring turn indicator, paper ledger on round end.
+- Generic: bid chips are plain circles; opponent seats are small but fine.
+- Fixed: hand was clipped by the rounded corner and bottom edge; landscape bid panel pushed the hand off screen (bid now overlays the empty center).
+- Fixed: seat info separated into score (muted) and won/bid pill (brass).
+- Deal uses a 40 ms stagger (spec says 70) so a 52-card deal stays under 3 s.
+
+## Phase 4 notes
+- Setup sheet is built from configSchema: groups, steppers, toggles, segmented selects, preset dropdown plus saved house rules.
+- Pass-and-play: full-screen "Pass to <name>" cover; hands show backs whenever the viewing seat is not the actor; tab-hide re-covers.
+- Reload resumes via a saved snapshot (Home shows Continue game); finished games clear the save.
+
+## Phase 5 notes
+- Online lobby: big room code in the display face, QR, Share/Copy link, seats as rows (host controls inline), ready states with connection dots.
+- Lobby rows for empty seats are tall; compress in the Phase 11 polish pass.
+- Reactions: 6 phrases + 6 emoji (emoji only here), bubble appears over the sender's seat.
+
+## Phase 6 self-review (Rangi, 360x740 and 740x360)
+- Cards: full-bleed color, rounded-square window (not an oval), Rozha numeral, faint dhaka diamonds at about 8%, corner symbols (sun, flower, mountain, leaf), raised-palm Skip, mandala Wild. Deck pile has stacked paper edges.
+- Generic: the table is clean but plain; opponents are just avatars and counts.
+- Fixed: in landscape the opponent counts hid behind the draw pile; opponents now use a row layout and the Draw tag sits below the pile.
+
+## Phase 7 self-review (Langur Burja, 360x740 and 740x360)
+- Cloth mat in maroon with a dashed brass border and cream printed squares, brass bowl with a lid seen from above, ivory 3D dice with SVG faces. Reads as objects on a table.
+- Generic: chip tray and buttons are the standard components.
+- Fixed: seats overlapped the bowl (flex shrink); dice showed crowns before the roll (hidden until the lid lifts); the "take chip back" button sat on top of the symbol button (moved into the stake row, still 44 px).
+- Roll sync: events reach every screen at once; the animation starts on receipt (no clock offset). Verified two browsers show the same result.
+
+## Phase 8 self-review (Jut Patti and Dhumbal)
+- Both share one table layout: opponents on top with card counts, stock and discard in the middle, your hand below. The Jut Patti indicator card is tucked sideways under the stock; jokers in your hand get a brass tab.
+- Dhumbal shows the last throw as a row you pick from and your own throw as a second row; Jhyap reveals every hand with the points added.
+- Generic: the center of both tables is quiet and plain. Candidate for Phase 11 polish (felt markings, a place for the indicator).
+- Fixed: Draw/Take tags overlapped the opponent seats in landscape (moved below the piles).
+
+## Phase 9 self-review (Teen Patti, Kitti, In Between)
+- Teen Patti: your three cards sit in the open at the bottom (backs until you look), opponents show three small backs and what they have put in; the pot is a real chip stack with the boot flying in at the deal. Bets, packs and side shows speak in a paper bubble.
+- Kitti: nine cards go into three labelled rows by tap-then-tap, each row names its hand live ("Sequence", "Pair"); Auto arrange fills the best split to tweak.
+- In Between: two posts with a dashed gap, the third card lands in the gap; the stepper has Min, Half pot and Max.
+- Generic: the three tables share one plain layout. Candidate for Phase 11 polish.
+- Fixed: In Between's row was wider than 360 px (deck and chips cut off); cards now size from the width.
+
+## Phase 10 self-review (Marriage)
+- Table: opponents with a 21 count and their shown sets in miniature; stock with the joker card tucked sideways under it (face down until you have seen); two-row hand with brass tabs on maal cards after seeing; Arrange groups sets with gaps via the solver.
+- Generic: the two rows are dense on a 360 px screen (cards about 56 px wide, step about 26 px). Drag-to-reorder is not built; Arrange and auto-sort stand in.
+- Meld solver: pure sequences are tried first so marriages stay pure; averages under 10 ms for random 22-card hands in tests.
+
+## Phase 11 self-review (Nepali, rules, Tihar theme, polish)
+- Nepali home reads naturally in Mukta; game names use the spec spellings; the Devanagari headings in Rozha One hold up in the rules sheet. All strings pass a parity test (every key in both languages, same placeholders, digits stay 0-9).
+- Tihar night with Langur Burja: indigo felt, the maroon cloth and brass bowl stay the focus.
+- Generic: sheets and the chip tray are still standard components.
+- Fixed: Langur Burja seats stacked one per row in portrait and pushed the controls off screen (columns again in portrait); the profile button's accessible name now contains its visible text.
+- Lighthouse (mobile, preview build): performance 92, accessibility 100, best practices 100, SEO 91.
+- Phase 12: About, Terms and Privacy are plain text pages with the chips note; home footer links work in portrait; in landscape they sit below the fold.

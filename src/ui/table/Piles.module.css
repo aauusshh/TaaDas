@@ -1,0 +1,49 @@
+.pile {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  flex: none;
+}
+button.pile {
+  cursor: pointer;
+}
+
+.layer {
+  position: absolute;
+  border-radius: 5.7% / 4.1%;
+  box-shadow: 0 1px 1.5px rgb(0 0 0 / 0.5);
+  background: #fff;
+}
+
+.empty {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  border: 2px dashed rgb(244 241 232 / 0.3);
+  border-radius: 6px;
+}
+
+.count {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  min-width: 20px;
+  padding: 0 5px;
+  height: 20px;
+  line-height: 20px;
+  border-radius: 10px;
+  background: var(--rim-dark);
+  color: var(--panel-text);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 0 0 1px var(--brass-dark);
+  z-index: 6;
+}
+
+.backs {
+  position: relative;
+  flex: none;
+}
