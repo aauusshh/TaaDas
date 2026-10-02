@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 11 — Polish (Phase 10 done)
+Phase 12 — Launch (Phase 11 done)
 
 ## Branch
 dev
@@ -32,6 +32,8 @@ dev
 - Phase 9: shared threeCard evaluator (category order, A-2-3 options, wilds, percentile table, 2-3-5 option), Teen Patti (blind/seen stakes, raise, side show, show, pot limit, max blind, Muflis/AK47/Joker), Kitti (280 splits, ties, salami, kitti carry-over, pack first, descending, run2), In Between (posts, ace choice, equal-post guess, reshuffle), bots for all, three table UIs. 74 new tests, sims ok, full games auto-played at 360x740.
 
 - Phase 10: Marriage rules module (maal roles with wrap, pure sequence/tunnela/trial/sequence, Superman and Man, meld solver with pure-first search, show validation, dublee counting), engine (deal with joker card set aside, seen/unseen discard rule, dublee route, declare with the solver, maal scoring with marriage, Classic/Kidnap/Murder, winner bonus, zero-sum settlement, stall safety), bots, table UI with two-row hand and Arrange. 28 tests, solver speed test, 25-game sim ok.
+
+- Phase 11: translation parity tests (every key in en and ne, placeholders, digits), Rules and Practice-round buttons in every setup sheet (rules pages shared with the tables), PWA (manifest, service worker, offline precache of every game chunk), icons 192/512/maskable/apple generated from the brand mark, 1200x630 OG image from a dev-only page, robots.txt, lazy routes and a lazy net layer (main JS 84 KB gz), keyboard bidding in Call Break, Lighthouse mobile 92/100/100/91 (perf/a11y/best practices/SEO).
 
 ## Decisions and why
 - Newer toolchain than the spec assumed (Vite 8, TS 6, vitest 5, react-router 7, zod 4, motion 13). Used as installed.
@@ -87,8 +89,12 @@ dev
 - Marriage points count whenever jhiplu, tiplu and poplu are held together (one of each), not only in the final arrangement of a losing player.
 - Drag-to-reorder of the hand is not built; Arrange/auto-sort only.
 
+- scripts/make-assets.mjs regenerates icons and og.png from a running dev server; generated files are committed.
+- VITE_SITE_URL (default https://aauusshh.github.io/TaaDas, guessed from the git user) fills the og:image URL; change it in .env.example and deploy.yml if the Pages address differs.
+- Nepali text is my draft for the owner to review (MANUAL_STEPS).
+
 ## Next step
-Phase 11 per SPEC section 16 (SPEC 8, 12, 13, 14): Nepali language pass, tutorials for all games, PWA, OG image, accessibility and performance passes.
+Phase 12 per SPEC section 16 (SPEC 7, 15): docs/QA.md, About/Terms/Privacy pages, final design review, owner checklist, final summary at the top of PROGRESS.md.
 
 ## Questions for owner
 Answer under each question. Claude uses the default until answered.

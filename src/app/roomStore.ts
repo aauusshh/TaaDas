@@ -1,7 +1,6 @@
 import { create } from 'zustand';
-import { ClientSession } from '../net/client';
-import { HostSession } from '../net/host';
-import { peerTransport } from '../net/peerTransport';
+import type { ClientSession } from '../net/client';
+import type { HostSession } from '../net/host';
 import { makeRoomCode } from '../net/roomCode';
 import { loadGame } from '../engine/registry';
 import type { GameConfig, GameId } from '../engine/core/types';
@@ -30,10 +29,14 @@ export async function createRoom(opts: {
   relay?: boolean;
 }): Promise<HostSession> {
   const game = await loadGame(opts.gameId);
+  const [{ HostSession: Host }, { peerTransport }] = await Promise.all([
+    import('../net/host'),
+    import('../net/peerTransport'),
+  ]);
   const p = useProfile.getState();
   let lastErr: unknown = null;
   for (let attempt = 0; attempt < 5; attempt++) {
-    const host = new HostSession({
+    const host = new Host({
       transport: peerTransport(!!opts.relay && hasTurn).host(),
       game,
       code: makeRoomCode(),
@@ -64,7 +67,11 @@ export async function resumeRoom(): Promise<HostSession | null> {
   const data = loadHostRoom();
   if (!data) return null;
   const game = await loadGame(data.gameId as GameId);
-  const host = await HostSession.restore(
+  const [{ HostSession: Host }, { peerTransport }] = await Promise.all([
+    import('../net/host'),
+    import('../net/peerTransport'),
+  ]);
+  const host = await Host.restore(
     {
       transport: peerTransport(false).host(),
       game,
@@ -81,8 +88,12 @@ export async function joinRoom(
   code: string,
   opts: { token: string | null; spectate?: boolean },
 ): Promise<ClientSession> {
+  const [{ ClientSession: Client }, { peerTransport }] = await Promise.all([
+    import('../net/client'),
+    import('../net/peerTransport'),
+  ]);
   const p = useProfile.getState();
-  const client = new ClientSession({
+  const client = new Client({
     transport: peerTransport(false).client(),
     code,
     name: p.name,

@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { Card } from '../../../engine/core/cards';
 import { createRng } from '../../../engine/core/rng';
 import { IllegalActionError } from '../../../engine/core/types';
@@ -295,6 +295,18 @@ export default function CallBreakTable({
       highlight={result?.winners}
     />
   ) : null;
+
+  // keyboard bidding: digits pick a bid (1-9), Enter places it
+  useEffect(() => {
+    if (!view || view.phase !== 'bidding' || !myTurn) return;
+    const h = (e: KeyboardEvent) => {
+      if (/^[1-9]$/.test(e.key) && view.legalBids.includes(Number(e.key))) setBidSel(Number(e.key));
+      else if (e.key === 'Enter' && bidSel !== null) submit({ type: 'bid', bid: bidSel });
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, myTurn, bidSel]);
 
   const status = (() => {
     if (!view) return '';

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { SvgDefs } from '../ui/cards/art/SvgDefs';
 import { FlightLayer } from '../ui/anim/FlightLayer';
@@ -6,11 +6,14 @@ import { ToastHost } from '../ui/components/Overlays';
 import { initSettings } from '../storage/settings';
 import { sound } from '../ui/sound/SoundManager';
 import { Home } from './Home';
-import { DevKit } from './DevKit';
-import { GameScreen } from './GameScreen';
-import { ProfileScreen } from './ProfileScreen';
-import { JoinScreen } from './JoinScreen';
-import { RoomScreen } from './RoomScreen';
+const DevKit = lazy(() => import('./DevKit').then((m) => ({ default: m.DevKit })));
+const DevOg = lazy(() => import('./DevOg').then((m) => ({ default: m.DevOg })));
+const GameScreen = lazy(() => import('./GameScreen').then((m) => ({ default: m.GameScreen })));
+const ProfileScreen = lazy(() =>
+  import('./ProfileScreen').then((m) => ({ default: m.ProfileScreen })),
+);
+const JoinScreen = lazy(() => import('./JoinScreen').then((m) => ({ default: m.JoinScreen })));
+const RoomScreen = lazy(() => import('./RoomScreen').then((m) => ({ default: m.RoomScreen })));
 
 export function App() {
   useEffect(() => {
@@ -23,15 +26,18 @@ export function App() {
     <HashRouter>
       <SvgDefs />
       <FlightLayer>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/play/:gameId" element={<GameScreen />} />
-          <Route path="/profile" element={<ProfileScreen />} />
-          <Route path="/join/:code" element={<JoinScreen />} />
-          <Route path="/room/:code" element={<RoomScreen />} />
-          {import.meta.env.DEV && <Route path="/dev/kit" element={<DevKit />} />}
-          <Route path="*" element={<Home />} />
-        </Routes>
+        <Suspense fallback={null}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/play/:gameId" element={<GameScreen />} />
+            <Route path="/profile" element={<ProfileScreen />} />
+            <Route path="/join/:code" element={<JoinScreen />} />
+            <Route path="/room/:code" element={<RoomScreen />} />
+            {import.meta.env.DEV && <Route path="/dev/kit" element={<DevKit />} />}
+            {import.meta.env.DEV && <Route path="/dev/og" element={<DevOg />} />}
+            <Route path="*" element={<Home />} />
+          </Routes>
+        </Suspense>
       </FlightLayer>
       <ToastHost />
     </HashRouter>

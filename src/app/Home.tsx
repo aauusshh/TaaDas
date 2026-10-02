@@ -51,7 +51,7 @@ export function Home() {
         <button
           type="button"
           className={s.profile}
-          aria-label={t('home.profile')}
+          aria-label={`${profile.name}, ${profile.chips.toLocaleString('en-US')} ${t('home.chips')}. ${t('home.profile')}`}
           onClick={() => nav('/profile')}
         >
           <Avatar id={profile.avatar} size={40} />

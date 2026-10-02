@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadGame } from '../engine/registry';
 import type {
@@ -25,7 +25,8 @@ import { BottomSheet, Dialog, useToast } from '../ui/components/Overlays';
 import { createRoom } from './roomStore';
 import { AVATAR_IDS } from '../ui/components/Avatar';
 import { sound } from '../ui/sound/SoundManager';
-import { BOT_NAMES, useLaunch } from './launch';
+import { BOT_NAMES, quickStart, useLaunch } from './launch';
+import { rulesPages } from './rulesRegistry';
 import s from './SetupSheet.module.css';
 
 type Mode = SetupMemory['mode'];
@@ -273,6 +274,31 @@ function SetupBody({
     nav(`/play/${game.id}`);
   };
 
+  const practice = () => {
+    sound.play('place');
+    const players = Math.min(4, game.maxPlayers);
+    const forced: GameConfig = { ...game.defaultConfig, ...(game.modeConfig?.('bots') ?? {}) };
+    if ('startChips' in game.defaultConfig)
+      forced.startChips = Math.max(500, useProfile.getState().chips);
+    const launch = quickStart(
+      game.id,
+      game.minPlayers === game.maxPlayers ? game.maxPlayers : players,
+      forced,
+    );
+    if (game.id === 'langurburja') {
+      launch.players[launch.players.length - 1] = {
+        ...launch.players[launch.players.length - 1],
+        name: t('lb.house'),
+        avatar: 'bell',
+      };
+    }
+    setLaunch({ ...launch, hints: true, timerSec: 0, mode: 'bots' });
+    nav(`/play/${game.id}`);
+  };
+
+  const Rules = rulesPages[game.id];
+  const [rulesOpen, setRulesOpen] = useState(false);
+
   const saveHouse = () => {
     const name = houseName.trim().slice(0, 24);
     if (!name) return;
@@ -295,6 +321,33 @@ function SetupBody({
 
   return (
     <BottomSheet open onClose={onClose} title={t(game.nameKey)} tall>
+      <div className={s.helpRow}>
+        {Rules && (
+          <Button size="small" onClick={() => setRulesOpen(true)}>
+            {t('common.rules')}
+          </Button>
+        )}
+        <Button size="small" onClick={practice}>
+          {t('setup.practice')}
+        </Button>
+      </div>
+      {Rules && (
+        <BottomSheet
+          open={rulesOpen}
+          onClose={() => setRulesOpen(false)}
+          title={t('common.rules')}
+          tall
+        >
+          <Suspense fallback={<p>{t('common.loading')}</p>}>
+            <Rules />
+          </Suspense>
+          <div className={s.footer}>
+            <Button tone="primary" onClick={practice}>
+              {t('setup.practice')}
+            </Button>
+          </div>
+        </BottomSheet>
+      )}
       <Segmented<Mode>
         label={t('setup.mode')}
         value={mode}

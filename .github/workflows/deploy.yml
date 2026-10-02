@@ -25,6 +25,7 @@ jobs:
       - run: npm run build
         env:
           VITE_BASE: /TaaDas/
+          VITE_SITE_URL: https://aauusshh.github.io/TaaDas
           VITE_TURN_URLS: ${{ secrets.VITE_TURN_URLS }}
           VITE_TURN_USERNAME: ${{ secrets.VITE_TURN_USERNAME }}
           VITE_TURN_CREDENTIAL: ${{ secrets.VITE_TURN_CREDENTIAL }}

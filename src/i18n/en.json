@@ -676,5 +676,6 @@
   "mg.rules.dubleeTitle": "Dublee route",
   "mg.rules.dublee": "Show seven dublees. After that you may only take a discard that makes your eighth, and you win when you hold eight.",
   "mg.rules.scoreTitle": "Scoring",
-  "mg.rules.score": "Each player with maal scores their points times the number of players, minus the total of everyone, so the round always adds up to zero. The winner also collects 3 from each player who has seen and 10 from each who has not."
+  "mg.rules.score": "Each player with maal scores their points times the number of players, minus the total of everyone, so the round always adds up to zero. The winner also collects 3 from each player who has seen and 10 from each who has not.",
+  "setup.practice": "Try a practice round"
 }

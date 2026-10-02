@@ -100,3 +100,9 @@
   display: flex;
   justify-content: flex-end;
 }
+
+.helpRow {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 10px;
+}

@@ -63,3 +63,10 @@
 - Table: opponents with a 21 count and their shown sets in miniature; stock with the joker card tucked sideways under it (face down until you have seen); two-row hand with brass tabs on maal cards after seeing; Arrange groups sets with gaps via the solver.
 - Generic: the two rows are dense on a 360 px screen (cards about 56 px wide, step about 26 px). Drag-to-reorder is not built; Arrange and auto-sort stand in.
 - Meld solver: pure sequences are tried first so marriages stay pure; averages under 10 ms for random 22-card hands in tests.
+
+## Phase 11 self-review (Nepali, rules, Tihar theme, polish)
+- Nepali home reads naturally in Mukta; game names use the spec spellings; the Devanagari headings in Rozha One hold up in the rules sheet. All strings pass a parity test (every key in both languages, same placeholders, digits stay 0-9).
+- Tihar night with Langur Burja: indigo felt, the maroon cloth and brass bowl stay the focus.
+- Generic: sheets and the chip tray are still standard components.
+- Fixed: Langur Burja seats stacked one per row in portrait and pushed the controls off screen (columns again in portrait); the profile button's accessible name now contains its visible text.
+- Lighthouse (mobile, preview build): performance 92, accessibility 100, best practices 100, SEO 91.

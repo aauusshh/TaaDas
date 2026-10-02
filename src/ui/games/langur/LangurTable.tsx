@@ -199,7 +199,7 @@ export default function LangurTable({
         auto={session.isAuto(seat)}
         conn={online ? session.getConn?.(seat) : undefined}
         you={seat === mySeat}
-        row
+        row={vp.landscape}
       />
     );
   };
