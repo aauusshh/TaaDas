@@ -71,6 +71,11 @@ dev
 - Decisions where unclear: Teen Patti raises keep the fixed rule step (a raise doubles the stake), so no free raise field; only its boot uses the stake control. Banker word: kept "Banker" with साहु in brackets rather than साहु alone. Langur min/max/step moved from select lists to number fields. Max players counts the banker (host) too.
 - Known gaps: e2e/playlangur.mjs and e2e/online-langur.mjs still click the old chip buttons and need updating to the stake field; e2e/stakes.mjs is the new screenshot script. Online lobby for Langur was verified through tests (memory transport) and not by two real browsers.
 
+## Change round 3: English is the default language again
+- Decision: the interface is English by default; Nepali (Devanagari) stays only in game names (Nepali first, English smaller), Langur Burja symbol names (Latin name with the Devanagari smaller beneath), "Banker (साहु)" on the Langur screen, and traditional terms in Latin letters, with Devanagari added in the English rules text (Jhyap, Tiplu, Poplu, Jhiplu, Alter, Dublee, Chaal, Pack, Salami, Kitti). Settings still offers English and नेपाली; choosing नेपाली translates everything as before. en.json and ne.json stay complete (parity test passes).
+- Migration: settings gained `languageChosenByUser` (set to true only when the person changes the language in Settings). On load, without that flag the language is English and a saved "ne" is overwritten in storage (migrateSettings in src/storage/settings.ts). Chosen languages are left alone. Tests: src/storage/settings.test.ts.
+- Supersedes the Nepali-default decision of change round 2. Screenshot script: e2e/english.mjs.
+
 ## Decisions and why
 - Newer toolchain than the spec assumed (Vite 8, TS 6, vitest 5, react-router 7, zod 4, motion 13). Used as installed.
 - vite-plugin-pwa installed but configured in Phase 11.

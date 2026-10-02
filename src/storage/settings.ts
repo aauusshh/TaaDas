@@ -7,6 +7,8 @@ export type BackId = 'dhaka' | 'indigo' | 'forest';
 
 export interface Settings {
   lang: Lang;
+  /** true only after the person picked a language in Settings */
+  languageChosenByUser: boolean;
   sound: boolean;
   volume: number;
   haptics: boolean;
@@ -21,7 +23,8 @@ export interface Settings {
 }
 
 export const defaultSettings: Settings = {
-  lang: 'ne',
+  lang: 'en',
+  languageChosenByUser: false,
   sound: true,
   volume: 0.7,
   haptics: true,
@@ -55,10 +58,29 @@ export function applySettingsToDocument(s: Settings) {
   root.style.setProperty('--anim-speed', String(s.animSpeed));
 }
 
+/**
+ * English unless the person chose another language themselves. A saved "ne" without the flag came from
+ * an earlier default, so it goes back to English.
+ */
+export function migrateSettings(saved: Partial<Settings> | null | undefined): Settings {
+  const merged = { ...defaultSettings, ...(saved ?? {}) };
+  if (merged.languageChosenByUser !== true)
+    return { ...merged, lang: 'en', languageChosenByUser: false };
+  return merged;
+}
+
+const loaded = loadJson<Settings>('settings', defaultSettings);
+const migrated = migrateSettings(loaded);
+if (loaded.lang !== migrated.lang || loaded.languageChosenByUser !== migrated.languageChosenByUser)
+  saveJson('settings', migrated);
+
 export const useSettings = create<SettingsStore>((set, get) => ({
-  ...loadJson<Settings>('settings', defaultSettings),
+  ...migrated,
   set: (k, v) => {
-    set({ [k]: v } as Partial<SettingsStore>);
+    set({
+      [k]: v,
+      ...(k === 'lang' ? { languageChosenByUser: true } : {}),
+    } as Partial<SettingsStore>);
     const { set: _s, ...rest } = get();
     void _s;
     saveJson('settings', rest);

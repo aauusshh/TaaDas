@@ -364,9 +364,9 @@ export default function LangurTable({
                     disabled={!canActFor(betSeat)}
                   >
                     <LBSymbol idx={sym} size={vp.landscape ? 36 : 38} />
-                    <span className={s.symName} lang="ne">
-                      {translate('ne', `lb.sym.${name}`)}
-                      <small lang="en">{t(`lb.symLatin.${name}`)}</small>
+                    <span className={s.symName}>
+                      {translate('en', `lb.symLatin.${name}`)}
+                      <small lang="ne">{translate('ne', `lb.sym.${name}`)}</small>
                     </span>
                   </button>
                   <div className={s.stakes}>
