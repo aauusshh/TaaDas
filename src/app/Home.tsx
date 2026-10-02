@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { AdSlot } from '../ui/components/AdSlot';
 import { availableGameIds } from '../engine/registry';
 import { Settings as SettingsIcon } from 'lucide-react';
 import { brand } from '../config/brand';
@@ -165,6 +166,12 @@ export function Home() {
           </Button>
         </form>
         <p className={s.note}>{t('app.chipsNote')}</p>
+        <AdSlot where="home" />
+        <nav className={s.links} aria-label={t('info.more')}>
+          <Link to="/about">{t('info.about.title')}</Link>
+          <Link to="/terms">{t('info.terms.title')}</Link>
+          <Link to="/privacy">{t('info.privacy.title')}</Link>
+        </nav>
       </footer>
 
       {open && availableGameIds().includes(open as GameId) && (

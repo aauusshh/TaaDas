@@ -7,6 +7,7 @@ import { initSettings } from '../storage/settings';
 import { sound } from '../ui/sound/SoundManager';
 import { Home } from './Home';
 const DevKit = lazy(() => import('./DevKit').then((m) => ({ default: m.DevKit })));
+const InfoPage = lazy(() => import('./InfoPages').then((m) => ({ default: m.InfoPage })));
 const DevOg = lazy(() => import('./DevOg').then((m) => ({ default: m.DevOg })));
 const GameScreen = lazy(() => import('./GameScreen').then((m) => ({ default: m.GameScreen })));
 const ProfileScreen = lazy(() =>
@@ -30,6 +31,9 @@ export function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/play/:gameId" element={<GameScreen />} />
+            <Route path="/about" element={<InfoPage page="about" />} />
+            <Route path="/terms" element={<InfoPage page="terms" />} />
+            <Route path="/privacy" element={<InfoPage page="privacy" />} />
             <Route path="/profile" element={<ProfileScreen />} />
             <Route path="/join/:code" element={<JoinScreen />} />
             <Route path="/room/:code" element={<RoomScreen />} />

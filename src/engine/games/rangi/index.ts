@@ -357,7 +357,7 @@ function applyPlay(
     endRound(s, seat, events);
     return;
   }
-  // "Ek!" window: humans must call it; bots call it themselves, easy ones forget now and then
+  // "Ek!" chance: humans must call it; bots call it themselves, easy ones forget now and then
   s.ek = null;
   if (s.config.callEk && s.hands[seat].length === 1) {
     const forgets = FORGET[s.levels[seat]] ?? 0;
