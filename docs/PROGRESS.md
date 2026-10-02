@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 10 — Marriage (Phase 9 done)
+Phase 11 — Polish (Phase 10 done)
 
 ## Branch
 dev
@@ -30,6 +30,8 @@ dev
 - Phase 8: Jut Patti (joker modes, pair color, odd deals cut to fit the stock, matches, stake chips) and Dhumbal (sets, runs, jokers wild, run-end picks, throw-after-match, Jhyap with counter, elimination or fixed rounds, stall safety) engines + bots + shared draw/discard table UI, multi-select hand. 25 tests, sims ok, full games auto-played at 360x740 (landscape checked for Jut Patti).
 
 - Phase 9: shared threeCard evaluator (category order, A-2-3 options, wilds, percentile table, 2-3-5 option), Teen Patti (blind/seen stakes, raise, side show, show, pot limit, max blind, Muflis/AK47/Joker), Kitti (280 splits, ties, salami, kitti carry-over, pack first, descending, run2), In Between (posts, ace choice, equal-post guess, reshuffle), bots for all, three table UIs. 74 new tests, sims ok, full games auto-played at 360x740.
+
+- Phase 10: Marriage rules module (maal roles with wrap, pure sequence/tunnela/trial/sequence, Superman and Man, meld solver with pure-first search, show validation, dublee counting), engine (deal with joker card set aside, seen/unseen discard rule, dublee route, declare with the solver, maal scoring with marriage, Classic/Kidnap/Murder, winner bonus, zero-sum settlement, stall safety), bots, table UI with two-row hand and Arrange. 28 tests, solver speed test, 25-game sim ok.
 
 ## Decisions and why
 - Newer toolchain than the spec assumed (Vite 8, TS 6, vitest 5, react-router 7, zod 4, motion 13). Used as installed.
@@ -80,8 +82,13 @@ dev
 - In Between: a turn's result lives in events and state.last; there is no separate result phase.
 - All chip games stake the profile chips when playing alone and update the profile at game end.
 
+- Marriage rounds end after 70 turns per player with no winner (maal only for seen players) so bot games always finish.
+- The solver treats maal cards as natural cards that may also stand in as wilds; leftover Man/Superman cards are absorbed into a sequence.
+- Marriage points count whenever jhiplu, tiplu and poplu are held together (one of each), not only in the final arrangement of a losing player.
+- Drag-to-reorder of the hand is not built; Arrange/auto-sort only.
+
 ## Next step
-Phase 10 per SPEC section 16 (rules/marriage): meld solver, seen/unseen flow, maal reveal, dublee path, scoring, auto-arrange, 2-row hand.
+Phase 11 per SPEC section 16 (SPEC 8, 12, 13, 14): Nepali language pass, tutorials for all games, PWA, OG image, accessibility and performance passes.
 
 ## Questions for owner
 Answer under each question. Claude uses the default until answered.
@@ -101,3 +108,5 @@ Answer under each question. Claude uses the default until answered.
 - Teen Patti: a player who cannot afford a bet can only pack (no all-in). Is that fine?
 - Kitti: default tie rule is that nobody wins a tied show; salami bonus on by default. OK?
 - In Between: when the pot runs dry everyone antes again; players under the ante sit out. OK?
+- Marriage: rounds with no finisher end after 70 turns per player (maal settles for seen players only). OK, or should the round never end?
+- Marriage: a marriage scores as soon as you hold one jhiplu, one tiplu and one poplu together, even if not in one sequence. Confirm?

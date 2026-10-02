@@ -11,6 +11,7 @@ const loaders: Partial<Record<GameId, Loader>> = {
   teenpatti: async () => (await import('./games/teenpatti')).teenPatti,
   kitti: async () => (await import('./games/kitti')).kitti,
   inbetween: async () => (await import('./games/inbetween')).inBetween,
+  marriage: async () => (await import('./games/marriage')).marriage,
   jutpatti: async () => (await import('./games/jutpatti')).jutPatti,
   langurburja: async () => (await import('./games/langurburja')).langurBurja,
 };

@@ -58,3 +58,8 @@
 - In Between: two posts with a dashed gap, the third card lands in the gap; the stepper has Min, Half pot and Max.
 - Generic: the three tables share one plain layout. Candidate for Phase 11 polish.
 - Fixed: In Between's row was wider than 360 px (deck and chips cut off); cards now size from the width.
+
+## Phase 10 self-review (Marriage)
+- Table: opponents with a 21 count and their shown sets in miniature; stock with the joker card tucked sideways under it (face down until you have seen); two-row hand with brass tabs on maal cards after seeing; Arrange groups sets with gaps via the solver.
+- Generic: the two rows are dense on a 360 px screen (cards about 56 px wide, step about 26 px). Drag-to-reorder is not built; Arrange and auto-sort stand in.
+- Meld solver: pure sequences are tried first so marriages stay pure; averages under 10 ms for random 22-card hands in tests.
