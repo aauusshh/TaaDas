@@ -19,12 +19,15 @@ export function BottomSheet({
   open,
   onClose,
   title,
+  label,
   children,
   tall,
 }: {
   open: boolean;
   onClose: () => void;
-  title: string;
+  title: ReactNode;
+  /** spoken name when `title` is not plain text */
+  label?: string;
   children: ReactNode;
   tall?: boolean;
 }) {
@@ -41,7 +44,7 @@ export function BottomSheet({
         className={`${s.sheet} ${tall ? s.tall : ''}`}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-label={label ?? (typeof title === 'string' ? title : undefined)}
         onClick={(e) => e.stopPropagation()}
       >
         <header className={s.sheetHead}>

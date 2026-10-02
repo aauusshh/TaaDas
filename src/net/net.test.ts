@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { callBreak } from '../engine/games/callbreak';
+import { langurBurja } from '../engine/games/langurburja';
 import type { CallBreakView } from '../engine/games/callbreak';
 import { ClientSession } from './client';
 import { HostSession } from './host';
@@ -41,6 +42,11 @@ async function makeHost(
   await host.open();
   return host;
 }
+/** bots are off until the host switches them on: fill every free seat with one */
+function fillBots(host: HostSession) {
+  host.setBotsEnabled(true);
+  while (host.getLobby().seats.some((x) => x.kind === 'empty')) host.addBotNext();
+}
 async function makeClient(code: string, name: string, extra = {}) {
   const c = new ClientSession({
     transport: memoryTransport.client(),
@@ -79,7 +85,8 @@ describe('lobby', () => {
     const a = await makeClient('K7M2Q', 'Asha');
     expect(a.seat).toBe(1);
     expect(a.lobby?.seats[1].name).toBe('Asha');
-    expect(host.canStart()).toBe(false); // Asha is not ready
+    expect(host.canStart()).toBe(false); // Asha is not ready, and nobody fills the free seats
+    fillBots(host);
     a.setReady(true);
     await waitFor(() => host.canStart());
     expect(host.startGame()).toBe(true);
@@ -109,6 +116,9 @@ describe('lobby', () => {
 
   it('host can swap seats and add or remove bots', async () => {
     const host = await makeHost();
+    host.addBot(2); // bots are off by default
+    expect(host.getLobby().seats[2].kind).toBe('empty');
+    host.setBotsEnabled(true);
     host.addBot(2);
     expect(host.getLobby().seats[2].kind).toBe('bot');
     host.swapSeats(0, 2);
@@ -128,6 +138,69 @@ describe('lobby', () => {
       host: { name: 'x', avatar: 'yak' },
     });
     await expect(second.open()).rejects.toThrow('code-taken');
+  });
+});
+
+describe('open rooms, optional bots, max players', () => {
+  const langurHost = (extra = {}) =>
+    makeHost('LANGU', { game: langurBurja as never, config: {}, seatCount: 10, ...extra });
+
+  it('Langur Burja: players join as they arrive, no bots, starts with the people who came', async () => {
+    const host = await langurHost();
+    const lobby = host.getLobby();
+    expect(lobby.botsEnabled).toBe(false);
+    expect(lobby.maxPlayers).toBe(10);
+    const a = await makeClient('LANGU', 'Asha');
+    const b = await makeClient('LANGU', 'Bimal');
+    a.setReady(true);
+    b.setReady(true);
+    await waitFor(() => host.canStart());
+    host.startGame();
+    await waitFor(() => a.state === 'playing');
+    const seats = host.getLobby().seats;
+    expect(seats).toHaveLength(3); // the host and two players, free seats dropped
+    expect(seats.some((x) => x.kind === 'bot')).toBe(false);
+    expect(b.mySeat).toBe(2);
+  });
+
+  it('max players can change while people join, and only blocks new joins when full', async () => {
+    const host = await langurHost();
+    await makeClient('LANGU', 'One');
+    host.setSeatCount(2); // the host and One fill it
+    await expect(makeClient('LANGU', 'Two')).rejects.toThrow('full');
+    host.setSeatCount(3);
+    const two = await makeClient('LANGU', 'Two');
+    expect(two.seat).toBe(2);
+    host.setSeatCount(2); // cannot drop a seated player
+    expect(host.getLobby().maxPlayers).toBe(3);
+  });
+
+  it('bots only appear when the host turns them on and adds them one by one', async () => {
+    const host = await langurHost();
+    host.addBotNext();
+    expect(host.getLobby().seats.filter((x) => x.kind === 'bot')).toHaveLength(0);
+    host.setBotsEnabled(true);
+    host.addBotNext();
+    host.addBotNext();
+    expect(host.getLobby().seats.filter((x) => x.kind === 'bot')).toHaveLength(2);
+    host.removeBotLast();
+    expect(host.getLobby().seats.filter((x) => x.kind === 'bot')).toHaveLength(1);
+    host.setBotsEnabled(false);
+    expect(host.getLobby().seats.filter((x) => x.kind === 'bot')).toHaveLength(0);
+  });
+
+  it('a card game needs its minimum players, filled by people or bots', async () => {
+    const host = await makeHost(); // Call Break: 4 seats
+    const a = await makeClient('K7M2Q', 'Asha');
+    a.setReady(true);
+    await waitFor(() => host.getLobby().seats[1].ready);
+    expect(host.canStart()).toBe(false); // 2 of 4 and bots are off
+    host.setSeatCount(6); // clamped to the game's range
+    expect(host.getLobby().seats.length).toBe(4);
+    host.setBotsEnabled(true);
+    host.addBotNext();
+    host.addBotNext();
+    expect(host.canStart()).toBe(true);
   });
 });
 
@@ -152,6 +225,7 @@ describe('a game over the wire', () => {
     const host = await makeHost();
     const a = await makeClient('K7M2Q', 'Asha');
     const b = await makeClient('K7M2Q', 'Bimal');
+    fillBots(host);
     a.setReady(true);
     b.setReady(true);
     await waitFor(() => host.canStart());
@@ -186,6 +260,7 @@ describe('a game over the wire', () => {
     const host = await makeHost();
     const a = await makeClient('K7M2Q', 'Asha');
     a.setReady(true);
+    fillBots(host);
     await waitFor(() => host.canStart());
     host.startGame();
     await waitFor(() => a.state === 'playing');
@@ -202,6 +277,7 @@ describe('a game over the wire', () => {
     const host = await makeHost();
     const a = await makeClient('K7M2Q', 'Asha');
     a.setReady(true);
+    fillBots(host);
     await waitFor(() => host.canStart());
     host.startGame();
     await waitFor(() => a.state === 'playing');

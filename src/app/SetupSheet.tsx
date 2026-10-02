@@ -1,3 +1,5 @@
+import { StakeField } from '../ui/components/StakeField';
+import { GameName, gameLabel } from '../ui/components/GameName';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadGame } from '../engine/registry';
@@ -64,7 +66,7 @@ export function FieldRow({
       <div className={s.fieldHead}>
         <span className={s.fieldLabel}>{label}</span>
         {field.type === 'toggle' && <Toggle label={label} checked={!!value} onChange={onChange} />}
-        {field.type === 'number' && (
+        {field.type === 'number' && !field.stake && (
           <Stepper
             label={label}
             value={Number(value)}
@@ -75,6 +77,22 @@ export function FieldRow({
           />
         )}
       </div>
+      {field.type === 'number' && field.stake && (
+        <StakeField
+          label={label}
+          value={Number(value)}
+          step={field.step ?? 1}
+          min={field.min}
+          max={field.max}
+          check={(n) => {
+            if (n < field.min) return t('lb.err.min', { n: field.min });
+            if (n > field.max) return t('lb.err.max', { n: field.max });
+            if (field.step && n % field.step !== 0) return t('lb.err.step', { n: field.step });
+            return null;
+          }}
+          onChange={onChange}
+        />
+      )}
       {field.type === 'select' && (
         <Segmented<string | number>
           label={label}
@@ -110,7 +128,12 @@ export function SetupSheet({ gameId, onClose }: { gameId: GameId; onClose: () =>
 
   if (!game) {
     return (
-      <BottomSheet open onClose={onClose} title={t(`game.${gameId}`)}>
+      <BottomSheet
+        open
+        onClose={onClose}
+        title={<GameName id={gameId} />}
+        label={gameLabel(gameId)}
+      >
         <p>{t('common.loading')}</p>
       </BottomSheet>
     );
@@ -198,6 +221,8 @@ function SetupBody({
     setRows((rs) => rs.map((r, k) => (k === i ? { ...r, ...patch } : r)));
 
   const seats = fixed ? game.maxPlayers : count;
+  // online rooms open at once; the host sets the seat count and bots in the lobby
+  const onlineSeats = game.id === 'langurburja' ? Math.min(10, game.maxPlayers) : seats;
   const active = rows.slice(0, seats);
   const humansCount = mode === 'bots' ? 1 : active.filter((r) => r.human).length;
   const [busy, setBusy] = useState(false);
@@ -210,7 +235,7 @@ function SetupBody({
       const host = await createRoom({
         gameId: game.id,
         config,
-        seatCount: seats,
+        seatCount: onlineSeats,
         timerSec,
         relay: false,
       });
@@ -320,7 +345,13 @@ function SetupBody({
   };
 
   return (
-    <BottomSheet open onClose={onClose} title={t(game.nameKey)} tall>
+    <BottomSheet
+      open
+      onClose={onClose}
+      title={<GameName id={game.id} />}
+      label={gameLabel(game.id)}
+      tall
+    >
       <div className={s.helpRow}>
         {Rules && (
           <Button size="small" onClick={() => setRulesOpen(true)}>
@@ -368,7 +399,7 @@ function SetupBody({
 
       {
         <>
-          {!fixed && (
+          {!fixed && mode !== 'online' && (
             <div className={s.field}>
               <div className={s.fieldHead}>
                 <span className={s.fieldLabel}>{t('setup.playerCount')}</span>
@@ -469,6 +500,19 @@ function SetupBody({
                   onChange={(v) => setField(f.key, v)}
                 />
               ))}
+              {g.group === 'payout' && (
+                <>
+                  <p className={s.hint}>{t('lb.payHint')}</p>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      for (const f of g.fields) setField(f.key, f.default);
+                    }}
+                  >
+                    {t('lb.payReset')}
+                  </Button>
+                </>
+              )}
             </section>
           ))}
 

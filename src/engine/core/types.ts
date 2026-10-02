@@ -49,7 +49,15 @@ export type ConfigField = {
 } & (
   | { type: 'toggle'; default: boolean }
   | { type: 'select'; default: ConfigValue; options: ConfigOption[] }
-  | { type: 'number'; default: number; min: number; max: number; step?: number }
+  | {
+      type: 'number';
+      default: number;
+      min: number;
+      max: number;
+      step?: number;
+      /** an amount of chips: shown with a number field and quick buttons */
+      stake?: boolean;
+    }
 );
 
 export interface GameResult {

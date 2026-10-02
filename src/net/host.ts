@@ -61,6 +61,7 @@ export interface PersistedHost {
   timerSec: number;
   locked: boolean;
   spectators: boolean;
+  botsEnabled?: boolean;
   gen: number;
   started: boolean;
   snapshot: Snapshot | null;
@@ -115,6 +116,7 @@ export class HostSession implements Session {
   config: GameConfig;
   timerSec: number;
   locked = false;
+  botsEnabled = false;
   spectators: boolean;
   started = false;
   relay: boolean;
@@ -170,6 +172,7 @@ export class HostSession implements Session {
     }));
     h.hostSeat = data.hostSeat;
     h.locked = data.locked;
+    h.botsEnabled = data.botsEnabled ?? data.seats.some((s) => s.kind === 'bot');
     h.generation = data.gen;
     await h.open();
     if (data.started && data.snapshot) {
@@ -222,6 +225,10 @@ export class HostSession implements Session {
       started: this.started,
       gen: this.generation,
       relay: this.relay,
+      botsEnabled: this.botsEnabled,
+      maxPlayers: this.slots.length,
+      minPlayers: this.game.minPlayers,
+      gameMax: this.game.maxPlayers,
     };
   }
 
@@ -247,8 +254,56 @@ export class HostSession implements Session {
     return this.slots.length;
   }
 
+  /** Put the seats in a new order (old indices), dropping the rest, and keep every pointer to a seat right. */
+  private reseat(order: number[]) {
+    const to = new Map(order.map((from, i) => [from, i]));
+    this.slots = order.map((from) => this.slots[from]);
+    this.hostSeat = to.get(this.hostSeat) ?? 0;
+    for (const info of this.conns.values())
+      if (typeof info.seat === 'number') info.seat = to.get(info.seat) ?? null;
+  }
+
+  /** Change how many seats the room holds. Never drops a seated player. */
+  setSeatCount(n: number) {
+    if (this.started) return;
+    const filled = this.slots.flatMap((s, i) => (s.kind === 'empty' ? [] : [i]));
+    const want = Math.max(
+      filled.length,
+      Math.min(this.game.maxPlayers, Math.max(this.game.minPlayers, Math.round(n))),
+    );
+    if (want === this.slots.length) return;
+    const empties = this.slots.flatMap((s, i) => (s.kind === 'empty' ? [i] : []));
+    if (want > this.slots.length) {
+      this.slots = [...this.slots, ...Array.from({ length: want - this.slots.length }, emptySlot)];
+    } else {
+      // drop empty seats from the end, so seated players keep their places
+      const drop = new Set(empties.slice(-(this.slots.length - want)));
+      this.reseat(this.slots.flatMap((_, i) => (drop.has(i) ? [] : [i])));
+    }
+    this.lobbyChanged();
+  }
+
+  /** Switch bots on or off. Turning them off sends the bots away. */
+  setBotsEnabled(v: boolean) {
+    if (this.started || this.botsEnabled === v) return;
+    this.botsEnabled = v;
+    if (!v) this.slots = this.slots.map((s) => (s.kind === 'bot' ? emptySlot() : s));
+    this.lobbyChanged();
+  }
+
+  /** Add one bot in the first free seat. */
+  addBotNext(difficulty: Difficulty = 'medium') {
+    const seat = this.slots.findIndex((s) => s.kind === 'empty');
+    if (seat >= 0) this.addBot(seat, difficulty);
+  }
+  /** Remove the bot in the last seat that has one. */
+  removeBotLast() {
+    const seat = this.slots.map((s) => s.kind).lastIndexOf('bot');
+    if (seat >= 0) this.removeBot(seat);
+  }
+
   addBot(seat: number, difficulty: Difficulty = 'medium') {
-    if (this.started || this.slots[seat]?.kind !== 'empty') return;
+    if (this.started || !this.botsEnabled || this.slots[seat]?.kind !== 'empty') return;
     const used = new Set(this.slots.map((s) => s.name));
     const name = BOT_NAMES.find((n) => !used.has(n)) ?? `Bot ${seat + 1}`;
     this.slots[seat] = {
@@ -335,24 +390,13 @@ export class HostSession implements Session {
     if (this.started) return false;
     const filled = this.slots.filter((s) => s.kind !== 'empty').length;
     const humansReady = this.slots.every((s) => s.kind !== 'human' || (s.ready && s.connId));
-    return filled >= 1 && this.slots.length >= this.game.minPlayers && humansReady;
+    return filled >= this.game.minPlayers && humansReady;
   }
 
   startGame() {
     if (!this.canStart()) return false;
-    const used = new Set(this.slots.map((s) => s.name));
-    this.slots = this.slots.map((s, i) => {
-      if (s.kind !== 'empty') return s;
-      const name = BOT_NAMES.find((n) => !used.has(n)) ?? `Bot ${i + 1}`;
-      used.add(name);
-      return {
-        ...emptySlot(),
-        kind: 'bot',
-        name,
-        avatar: BOT_AVATARS[i % BOT_AVATARS.length],
-        ready: true,
-      };
-    });
+    // seats nobody took are dropped: bots only play when the host added them
+    this.reseat(this.slots.flatMap((s, i) => (s.kind === 'empty' ? [] : [i])));
     this.started = true;
     this.newGame();
     this.lobbyChanged();
@@ -672,6 +716,7 @@ export class HostSession implements Session {
       timerSec: this.timerSec,
       locked: this.locked,
       spectators: this.spectators,
+      botsEnabled: this.botsEnabled,
       gen: this.generation,
       started: this.started,
       snapshot: snap,

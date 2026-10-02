@@ -47,11 +47,14 @@ export const configSchema: ConfigField[] = [
   },
   {
     key: 'boot',
-    type: 'select',
+    type: 'number',
+    stake: true,
     labelKey: 'tp.boot',
     group: 'betting',
     default: 10,
-    options: [10, 50, 100].map((v) => ({ value: v, labelKey: `lb.chips.${v}` })),
+    min: 5,
+    max: 1000,
+    step: 5,
   },
   {
     key: 'salamiBonus',

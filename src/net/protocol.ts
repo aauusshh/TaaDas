@@ -70,6 +70,13 @@ export const Lobby = z.object({
   started: z.boolean(),
   gen: z.number().int(),
   relay: z.boolean(),
+  /** the host lets bots fill seats (off until switched on) */
+  botsEnabled: z.boolean().default(false),
+  /** seats the room holds: new joins are refused when they are all taken */
+  maxPlayers: z.number().int().default(0),
+  /** fewest players the game can start with, and most it supports */
+  minPlayers: z.number().int().default(2),
+  gameMax: z.number().int().default(2),
 });
 export type Lobby = z.infer<typeof Lobby>;
 

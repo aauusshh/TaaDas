@@ -67,7 +67,7 @@
 
 .square {
   position: relative;
-  min-height: 84px;
+  min-height: 74px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -112,9 +112,52 @@
   cursor: default;
 }
 .symName {
-  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #4d4432;
+}
+.symName small {
+  font-size: 10px;
+  font-weight: 500;
+  color: #7a6f57;
+}
+.square[data-picked='true'] {
+  box-shadow:
+    inset 0 0 0 3px var(--brass),
+    0 0 0 2px var(--brass-light);
+}
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--panel-text);
+}
+.totalRow span:last-child {
+  color: var(--panel-muted);
   font-weight: 600;
-  color: #6b604a;
+}
+.outcomes {
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+}
+.outcomes li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.outcomes li[data-lost='true'] b {
+  color: #ffb199;
 }
 .stakes {
   display: flex;
@@ -135,17 +178,6 @@
   line-height: 20px;
   text-align: center;
   box-shadow: 0 1px 1.5px rgb(0 0 0 / 0.45);
-}
-.minus {
-  width: 44px;
-  height: 44px;
-  margin: -12px -4px;
-  border: 0;
-  background: none;
-  font-size: 24px;
-  font-weight: 700;
-  color: #7a2a1c;
-  cursor: pointer;
 }
 .count {
   position: absolute;
@@ -207,61 +239,12 @@
 
 .tray {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
-  padding: 6px 8px;
+  padding: 8px 10px;
   background: rgb(0 0 0 / 0.28);
   border-radius: 10px;
 }
-.chips {
-  display: flex;
-  gap: 4px;
-}
-.chipBtn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-  min-width: 46px;
-  min-height: 52px;
-  padding: 3px 4px;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  background: none;
-  color: var(--panel-text);
-  font-weight: 700;
-  font-size: 12px;
-  cursor: pointer;
-}
-.chipBtn[data-on='true'] {
-  border-color: var(--brass-light);
-  background: rgb(0 0 0 / 0.25);
-  transform: translateY(-2px);
-}
-.chipBtn:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-.disc {
-  position: relative;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  box-shadow: 0 1.5px 0 rgb(0 0 0 / 0.55);
-}
-.disc i {
-  position: absolute;
-  inset: 5px;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.55);
-}
-.left {
-  margin-left: auto;
-  font-size: 13px;
-  color: var(--panel-muted);
-}
-
 .pickers {
   display: flex;
   flex-wrap: wrap;
@@ -374,4 +357,16 @@
   grid-area: controls;
   overflow-y: auto;
   justify-content: center;
+}
+
+/* portrait: the stake panel stays in reach while the table scrolls behind it */
+.board:not([data-landscape='true']) .controls {
+  position: sticky;
+  bottom: -6px;
+  z-index: 5;
+  margin: 0 -6px -6px;
+  padding: 6px 6px 10px;
+  background: rgb(14 48 37 / 0.97);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 -6px 14px rgb(0 0 0 / 0.35);
 }

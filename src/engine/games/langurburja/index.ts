@@ -8,13 +8,13 @@ import {
   type PlayerInfo,
   type Step,
 } from '../../core/types';
-import { CHIP_VALUES, configSchema, defaultConfig, presets, type LangurConfig } from './config';
+import { configSchema, defaultConfig, presets, type LangurConfig } from './config';
 
 export type { LangurConfig };
 
 export type LBAction =
-  | { type: 'bet'; symbol: number; amount: number }
-  | { type: 'unbet'; symbol: number; amount: number }
+  /** set the stake on one symbol to exactly this amount (0 takes it back) */
+  | { type: 'setBet'; symbol: number; amount: number }
   | { type: 'ready' }
   | { type: 'close' }
   | { type: 'roll' }
@@ -58,8 +58,6 @@ export interface LBView {
   counts: number[] | null;
   net: number[];
   history: LBState['history'];
-  /** chip values the viewer can still add right now */
-  amounts: number[];
   canReady: boolean;
   canClose: boolean;
   canRoll: boolean;
@@ -67,14 +65,35 @@ export interface LBView {
 }
 
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
-const staked = (s: LBState, seat: number) => sum(s.bets[seat]);
 const isBettor = (s: LBState, seat: number) => seat !== s.banker;
 
-/** Net chips for one stake on one symbol given how many dice showed it. */
+/** Total returned per unit staked when `count` dice show the symbol. */
+export function returnsFor(count: number, cfg: LangurConfig): number {
+  if (count <= 0) return 0;
+  return (cfg as unknown as Record<string, number>)[`pay${Math.min(6, count)}`];
+}
+
+/** Net chips for one stake on one symbol: what comes back minus the stake. */
 export function payoutFor(count: number, stake: number, cfg: LangurConfig): number {
-  if (count <= 0) return cfg.loseOnZero ? -stake : 0;
-  const mult = (cfg as unknown as Record<string, number>)[`pay${Math.min(6, count)}`];
-  return stake * mult;
+  return stake * (returnsFor(count, cfg) - 1);
+}
+
+/** Why a stake cannot be set, or null when it is fine. */
+export function stakeProblem(
+  s: Pick<LBState, 'config' | 'chips' | 'bets'>,
+  seat: number,
+  symbol: number,
+  amount: number,
+): 'whole' | 'step' | 'min' | 'max' | 'chips' | null {
+  const { step, minBet, maxBet } = s.config;
+  if (!Number.isInteger(amount) || amount < 0) return 'whole';
+  if (amount === 0) return null;
+  if (amount % step !== 0) return 'step';
+  if (amount < minBet) return 'min';
+  if (amount > maxBet) return 'max';
+  const others = sum(s.bets[seat]) - s.bets[seat][symbol];
+  if (others + amount > s.chips[seat]) return 'chips';
+  return null;
 }
 
 export function settle(
@@ -104,16 +123,10 @@ function actionsFor(s: LBState, seat: number): LBAction[] {
   const out: LBAction[] = [];
   if (s.phase === 'betting') {
     if (isBettor(s, seat) && !s.ready[seat]) {
-      const left = s.chips[seat] - staked(s, seat);
-      for (let sym = 0; sym < 6; sym++) {
-        for (const amount of CHIP_VALUES) {
-          if (amount <= left && s.bets[seat][sym] + amount <= s.config.maxBet)
-            out.push({ type: 'bet', symbol: sym, amount });
-          if (amount <= s.bets[seat][sym]) out.push({ type: 'unbet', symbol: sym, amount });
-        }
-      }
-      const okMin = s.bets[seat].every((b) => b === 0 || b >= s.config.minBet);
-      if (okMin) out.push({ type: 'ready' });
+      // any stake is legal when stakeProblem allows it; the list only names the take-backs
+      for (let sym = 0; sym < 6; sym++)
+        if (s.bets[seat][sym] > 0) out.push({ type: 'setBet', symbol: sym, amount: 0 });
+      out.push({ type: 'ready' });
     }
     if (seat === s.banker && s.humans[seat]) out.push({ type: 'close' });
   } else if (s.phase === 'rolling') {
@@ -187,21 +200,21 @@ function apply(state: LBState, seat: number, a: LBAction, rng: Rng): Step<LBStat
     history: state.history,
   };
   const legal = actionsFor(s, seat);
-  const key = (x: LBAction) =>
-    x.type === 'bet' || x.type === 'unbet' ? `${x.type}|${x.symbol}|${x.amount}` : x.type;
-  const same = (x: LBAction) => key(x) === key(a);
-  if (!legal.some(same)) throw new IllegalActionError('illegal action');
   const events: GameEvent[] = [];
+  if (a.type === 'setBet') {
+    const open = s.phase === 'betting' && isBettor(s, seat) && !s.ready[seat];
+    const sym = Number(a.symbol);
+    if (!open || !Number.isInteger(sym) || sym < 0 || sym > 5)
+      throw new IllegalActionError('illegal action');
+    const why = stakeProblem(s, seat, sym, a.amount);
+    if (why) throw new IllegalActionError(`stake: ${why}`);
+    s.bets[seat][sym] = a.amount;
+    events.push(ev.note('bet', { symbol: sym, amount: a.amount }, seat));
+    return { state: s, events };
+  }
+  if (!legal.some((x) => x.type === a.type)) throw new IllegalActionError('illegal action');
 
   switch (a.type) {
-    case 'bet':
-      s.bets[seat][a.symbol] += a.amount;
-      events.push(ev.note('bet', { symbol: a.symbol, amount: a.amount }, seat));
-      return { state: s, events };
-    case 'unbet':
-      s.bets[seat][a.symbol] -= a.amount;
-      events.push(ev.note('unbet', { symbol: a.symbol, amount: a.amount }, seat));
-      return { state: s, events };
     case 'ready':
       s.ready[seat] = true;
       events.push(ev.note('ready', undefined, seat));
@@ -240,9 +253,6 @@ function apply(state: LBState, seat: number, a: LBAction, rng: Rng): Step<LBStat
 
 function view(s: LBState, seat: ViewerSeat): LBView {
   const legal = seat === 'spectator' ? [] : actionsFor(s, seat);
-  const amounts = [
-    ...new Set(legal.filter((a) => a.type === 'bet').map((a) => (a as { amount: number }).amount)),
-  ];
   return {
     seat,
     config: s.config,
@@ -260,7 +270,6 @@ function view(s: LBState, seat: ViewerSeat): LBView {
     counts: s.dice ? (s.history[s.history.length - 1]?.counts ?? null) : null,
     net: s.net,
     history: s.history,
-    amounts,
     canReady: legal.some((a) => a.type === 'ready'),
     canClose: legal.some((a) => a.type === 'close'),
     canRoll: legal.some((a) => a.type === 'roll'),
@@ -286,43 +295,30 @@ function bot(v: LBView, legal: LBAction[], level: Difficulty, rng: Rng): LBActio
   const find = (t: LBAction['type']) => legal.find((a) => a.type === t);
   if (find('next')) return find('next')!;
   if (find('roll')) return find('roll')!;
-  if (find('close') && !find('bet') && !find('ready')) return find('close')!;
+  if (find('close') && !find('ready')) return find('close')!;
   const me = v.seat as number;
   const mine = v.bets[me];
-  const min = v.config.minBet;
-  const bets = legal.filter((a): a is Extract<LBAction, { type: 'bet' }> => a.type === 'bet');
-  const unbets = legal.filter((a): a is Extract<LBAction, { type: 'unbet' }> => a.type === 'unbet');
-
-  // a stake under the table minimum cannot be locked in: top it up, or take it back
-  const under = mine.findIndex((b) => b > 0 && b < min);
-  if (under >= 0) {
-    const topUp = bets
-      .filter((a) => a.symbol === under && mine[under] + a.amount >= min)
-      .sort((x, y) => x.amount - y.amount)[0];
-    if (topUp) return topUp;
-    const back = unbets.filter((a) => a.symbol === under).sort((x, y) => y.amount - x.amount)[0];
-    if (back) return back;
-  }
+  const { minBet, maxBet, step } = v.config;
+  const left = v.chips[me] - mine.reduce((x, y) => x + y, 0);
 
   const placed = mine.filter((b) => b > 0).length;
   const want = 1 + ((v.round + me) % 3);
-  if (placed < want) {
+  if (placed < want && left >= minBet) {
     const recent = v.history.slice(-5);
     const totals = [0, 0, 0, 0, 0, 0];
     for (const h of recent) h.counts.forEach((c, i) => (totals[i] += c));
     const follow = level !== 'easy' && recent.length > 0 && (v.round + me) % 3 === 0;
     const hot = totals.indexOf(Math.max(...totals));
-    const fresh = bets.filter((a) => mine[a.symbol] === 0 && a.amount >= min);
-    const small = fresh.filter((a) => a.amount <= Math.max(100, min));
-    const pool = small.length ? small : fresh;
-    if (pool.length) {
-      const preferred = follow ? pool.filter((a) => a.symbol === hot) : [];
-      return rng.pick(preferred.length ? preferred : pool);
-    }
+    const fresh = [0, 1, 2, 3, 4, 5].filter((i) => mine[i] === 0);
+    const sym = follow && fresh.includes(hot) ? hot : rng.pick(fresh);
+    // a small stake: one to four times the minimum, kept on the step and inside the limits
+    const cap = Math.min(maxBet, left, minBet * 4);
+    const units = Math.max(1, Math.floor(cap / step));
+    let amount = (1 + rng.int(units)) * step;
+    if (amount < minBet) amount = Math.ceil(minBet / step) * step;
+    if (amount <= cap) return { type: 'setBet', symbol: sym, amount };
   }
-  const ready = find('ready');
-  if (ready) return ready;
-  return unbets[0] ?? first;
+  return find('ready') ?? first;
 }
 
 export const langurBurja: GameDefinition<LBState, LBAction, LangurConfig, LBView> = {
@@ -352,12 +348,8 @@ export const langurBurja: GameDefinition<LBState, LBAction, LangurConfig, LBView
         : [],
   timeoutAction(s, seat) {
     if (s.phase === 'betting') {
-      const legal = actionsFor(s, seat);
-      const ready = legal.find((a) => a.type === 'ready');
-      if (ready) return ready;
-      // stakes below the minimum: take them back so the player can sit out
-      const unbet = legal.find((a) => a.type === 'unbet');
-      return unbet ?? { type: 'close' };
+      const ready = actionsFor(s, seat).find((a) => a.type === 'ready');
+      return ready ?? { type: 'close' };
     }
     if (s.phase === 'rolling') return { type: 'roll' };
     return { type: 'next' };

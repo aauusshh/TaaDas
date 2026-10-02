@@ -12,7 +12,7 @@ import { useViewport } from '../../anim/useViewport';
 import { haptic } from '../../haptics';
 import { sound } from '../../sound/SoundManager';
 import { Button } from '../../components/Button';
-import { Stepper } from '../../components/Controls';
+import { StakeField } from '../../components/StakeField';
 import { useToast } from '../../components/Overlays';
 import { ChipStack } from '../../table/ChipStack';
 import { ResultPanel } from '../../table/ResultPanel';
@@ -173,8 +173,7 @@ export default function InBetweenTable({
   };
 
   const result = view?.phase === 'over' ? session.result() : null;
-  const step = view?.config.minBet ?? 10;
-  const clamp = (v: number) => (view ? Math.min(Math.max(v, view.minBet), view.maxBet) : v);
+  const step = (view?.config.minBet ?? 10) % 5 === 0 ? 5 : 1;
 
   const seatNode = (seat: number) => (
     <div key={seat} className={s.seatBox}>
@@ -324,31 +323,22 @@ export default function InBetweenTable({
 
           {myTurn && view && (view.canBet || view.canGuess) && (
             <>
-              <div className={b.amountRow}>
-                <Stepper
-                  label={t('ib.amount')}
-                  value={amount}
-                  min={view.minBet}
-                  max={view.maxBet}
-                  step={step}
-                  onChange={(v) => setAmount(clamp(v))}
-                />
-                <div className={b.quick}>
-                  <Button size="small" tone="quiet" onClick={() => setAmount(view.minBet)}>
-                    {t('ib.min')}
-                  </Button>
-                  <Button
-                    size="small"
-                    tone="quiet"
-                    onClick={() => setAmount(clamp(Math.floor(view.pot / 2 / step) * step))}
-                  >
-                    {t('ib.half')}
-                  </Button>
-                  <Button size="small" tone="quiet" onClick={() => setAmount(view.maxBet)}>
-                    {t('ib.max')}
-                  </Button>
-                </div>
-              </div>
+              <StakeField
+                label={t('ib.amount')}
+                value={amount}
+                step={step}
+                min={view.minBet}
+                max={view.maxBet}
+                check={(n) => {
+                  if (n < view.minBet) return t('lb.err.min', { n: view.minBet });
+                  if (n > view.maxBet)
+                    return t('lb.err.chips', {
+                      n: (view.chips[mySeat] ?? 0).toLocaleString('en-US'),
+                    });
+                  return null;
+                }}
+                onChange={setAmount}
+              />
               <div className={s.btns}>
                 {view.canBet && (
                   <Button tone="primary" onClick={() => submit({ type: 'bet', amount })}>

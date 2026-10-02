@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { GameName, gameLabel } from '../ui/components/GameName';
 import { AdSlot } from '../ui/components/AdSlot';
 import { availableGameIds } from '../engine/registry';
 import { Settings as SettingsIcon } from 'lucide-react';
@@ -89,7 +90,9 @@ export function Home() {
             <span className={s.art}>
               <GameObject id={g.id} />
             </span>
-            <span className={s.tag}>{t(`game.${g.id}`)}</span>
+            <span className={s.tag}>
+              <GameName id={g.id} block />
+            </span>
           </button>
         ))}
       </main>
@@ -138,7 +141,7 @@ export function Home() {
               nav('/play/' + saved.snapshot.gameId);
             }}
           >
-            {t('home.continueGame', { game: t(`game.${saved.snapshot.gameId}`) })}
+            {t('home.continueGame', { game: gameLabel(saved.snapshot.gameId) })}
           </Button>
         )}
         <form
@@ -178,7 +181,12 @@ export function Home() {
         <SetupSheet gameId={open as GameId} onClose={() => setOpen(null)} />
       )}
       {open && !availableGameIds().includes(open as GameId) && (
-        <BottomSheet open onClose={() => setOpen(null)} title={t(`game.${open}`)}>
+        <BottomSheet
+          open
+          onClose={() => setOpen(null)}
+          title={<GameName id={open} />}
+          label={gameLabel(open)}
+        >
           <p style={{ marginTop: 0 }}>{t(`game.${open}.blurb`)}</p>
           <p style={{ color: 'var(--panel-muted)' }}>{t('home.comingSoon')}</p>
         </BottomSheet>

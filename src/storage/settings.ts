@@ -21,7 +21,7 @@ export interface Settings {
 }
 
 export const defaultSettings: Settings = {
-  lang: 'en',
+  lang: 'ne',
   sound: true,
   volume: 0.7,
   haptics: true,

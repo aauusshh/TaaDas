@@ -71,3 +71,4 @@
 - Fixed: Langur Burja seats stacked one per row in portrait and pushed the controls off screen (columns again in portrait); the profile button's accessible name now contains its visible text.
 - Lighthouse (mobile, preview build): performance 92, accessibility 100, best practices 100, SEO 91.
 - Phase 12: About, Terms and Privacy are plain text pages with the chips note; home footer links work in portrait; in landscape they sit below the fold.
+- Change round 2: portrait Langur panel is sticky at the bottom with a smaller bowl and mat; landscape keeps the right-hand column. Stake field buttons are 44 px tall.

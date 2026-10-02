@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createRng } from '../../core/rng';
 import { IllegalActionError } from '../../core/types';
 import { makePlayers, simulate } from '../../sim/simulate';
-import { langurBurja, payoutFor, settle, type LBAction, type LBState } from './index';
+import { langurBurja, payoutFor, returnsFor, settle, type LBAction, type LBState } from './index';
 import { defaultConfig, type LangurConfig } from './config';
 
 const rng = createRng(3);
@@ -13,75 +13,96 @@ const mk = (n = 3, cfg: Partial<LangurConfig> = {}, humans = n) =>
 const step = (s: LBState, seat: number, a: LBAction) => langurBurja.apply(s, seat, a, rng).state;
 
 describe('payout math', () => {
-  it('every count from 0 to 6 with the default table', () => {
+  it('stake 100: 0 or 1 matching dice lose it, 2 double, 3 treble, 6 pay six times', () => {
     const cfg = defaultConfig;
     expect(payoutFor(0, 100, cfg)).toBe(-100);
-    for (let c = 1; c <= 6; c++) expect(payoutFor(c, 100, cfg)).toBe(100 * c);
+    expect(payoutFor(1, 100, cfg)).toBe(-100); // one die does not pay: nothing comes back
+    expect(payoutFor(2, 100, cfg)).toBe(100); // 200 back, profit 100
+    expect(payoutFor(3, 100, cfg)).toBe(200); // 300 back, profit 200
+    expect(payoutFor(4, 100, cfg)).toBe(300);
+    expect(payoutFor(5, 100, cfg)).toBe(400);
+    expect(payoutFor(6, 100, cfg)).toBe(500); // 600 back
+    expect(returnsFor(1, cfg)).toBe(0);
+    expect(returnsFor(2, cfg)).toBe(2);
   });
-  it('an edited table is applied, and zero can keep the stake', () => {
-    const cfg = { ...defaultConfig, pay1: 2, pay3: 10, loseOnZero: false };
-    expect(payoutFor(1, 50, cfg)).toBe(100);
-    expect(payoutFor(3, 50, cfg)).toBe(500);
-    expect(payoutFor(0, 50, cfg)).toBe(0);
+  it('an edited table is applied, and a one-die row can return the stake', () => {
+    const cfg = { ...defaultConfig, pay1: 1, pay2: 3, pay3: 10 };
+    expect(payoutFor(1, 50, cfg)).toBe(0);
+    expect(payoutFor(2, 50, cfg)).toBe(100);
+    expect(payoutFor(3, 50, cfg)).toBe(450);
+    expect(payoutFor(0, 50, cfg)).toBe(-50);
   });
   it('multiple bets per player settle independently and the banker takes the other side', () => {
     // seat 0 banker; seat 1 bets 100 crown + 50 flag; dice: three crowns, no flag
     const bets = [Array(6).fill(0), [100, 50, 0, 0, 0, 0], [0, 0, 200, 0, 0, 0]];
     const { net, counts } = settle(bets, [0, 0, 0, 2, 3, 4], 0, defaultConfig);
     expect(counts).toEqual([3, 0, 1, 1, 1, 0]);
-    expect(net[1]).toBe(100 * 3 - 50);
-    expect(net[2]).toBe(200 * 1);
-    expect(net[0]).toBe(-(250 + 200));
+    expect(net[1]).toBe(200 - 50);
+    expect(net[2]).toBe(-200); // a lone die loses the stake
+    expect(net[0]).toBe(-(150 - 200));
     expect(net.reduce((a, b) => a + b, 0)).toBe(0);
   });
 });
 
 describe('a round', () => {
-  it('betting: chips come out of balance only as stakes, limits and locks hold', () => {
+  it('stakes: any amount on the step, limits, own-chips cap and locks hold', () => {
     let s = mk(3);
     expect(s.banker).toBe(0);
-    s = step(s, 1, { type: 'bet', symbol: 2, amount: 100 });
-    expect(langurBurja.view(s, 1).staked[1]).toBe(100);
-    // cannot bet past the per-symbol maximum
-    for (let i = 0; i < 9; i++) s = step(s, 1, { type: 'bet', symbol: 2, amount: 100 });
-    expect(() => step(s, 1, { type: 'bet', symbol: 2, amount: 10 })).toThrow(IllegalActionError);
-    // unbet gives it back
-    s = step(s, 1, { type: 'unbet', symbol: 2, amount: 500 });
-    expect(s.bets[1][2]).toBe(500);
-    // the banker cannot bet, strangers cannot act for others
-    expect(() => step(s, 0, { type: 'bet', symbol: 0, amount: 10 })).toThrow(IllegalActionError);
-    // minimum bet is enforced when locking in
-    let m = mk(3, { minBet: 50 });
-    m = step(m, 1, { type: 'bet', symbol: 0, amount: 10 });
-    expect(langurBurja.legalActions(m, 1).some((a) => a.type === 'ready')).toBe(false);
-    m = step(m, 1, { type: 'bet', symbol: 0, amount: 50 });
-    expect(langurBurja.legalActions(m, 1).some((a) => a.type === 'ready')).toBe(true);
+    s = step(s, 1, { type: 'setBet', symbol: 2, amount: 135 });
+    expect(langurBurja.view(s, 1).staked[1]).toBe(135);
+    s = step(s, 1, { type: 'setBet', symbol: 2, amount: 75 }); // edit freely
+    expect(s.bets[1][2]).toBe(75);
+    const bad =
+      (a: number, sym = 2) =>
+      () =>
+        step(s, 1, { type: 'setBet', symbol: sym, amount: a });
+    expect(bad(1001)).toThrow(IllegalActionError); // over the maximum
+    expect(bad(7)).toThrow(IllegalActionError); // off the step of 5
+    expect(bad(-5)).toThrow(IllegalActionError);
+    expect(bad(5.5)).toThrow(IllegalActionError);
+    expect(bad(5000, 3)).toThrow(IllegalActionError);
+    s = step(s, 1, { type: 'setBet', symbol: 2, amount: 0 }); // take it back
+    expect(s.bets[1][2]).toBe(0);
+    // total across symbols cannot pass the player's chips
+    let r = mk(3, { maxBet: 5000, startChips: 1000 });
+    r = step(r, 1, { type: 'setBet', symbol: 0, amount: 600 });
+    expect(() => step(r, 1, { type: 'setBet', symbol: 1, amount: 405 })).toThrow(
+      IllegalActionError,
+    );
+    r = step(r, 1, { type: 'setBet', symbol: 1, amount: 400 });
+    expect(langurBurja.view(r, 1).staked[1]).toBe(1000);
+    // the banker cannot bet
+    expect(() => step(s, 0, { type: 'setBet', symbol: 0, amount: 10 })).toThrow(IllegalActionError);
+    // minimum and step are host settings
+    const m = mk(3, { minBet: 50, step: 10 });
+    expect(() => step(m, 1, { type: 'setBet', symbol: 0, amount: 40 })).toThrow(IllegalActionError);
+    expect(step(m, 1, { type: 'setBet', symbol: 0, amount: 60 }).bets[1][0]).toBe(60);
   });
 
   it('bets are locked once a player is ready, and after betting closes', () => {
     let s = mk(3);
-    s = step(s, 1, { type: 'bet', symbol: 0, amount: 100 });
+    s = step(s, 1, { type: 'setBet', symbol: 0, amount: 100 });
     s = step(s, 1, { type: 'ready' });
-    expect(() => step(s, 1, { type: 'bet', symbol: 1, amount: 10 })).toThrow(IllegalActionError);
+    expect(() => step(s, 1, { type: 'setBet', symbol: 1, amount: 10 })).toThrow(IllegalActionError);
     s = step(s, 2, { type: 'ready' });
     expect(s.phase).toBe('rolling'); // everyone ready closes betting
-    expect(() => step(s, 2, { type: 'bet', symbol: 1, amount: 10 })).toThrow(IllegalActionError);
+    expect(() => step(s, 2, { type: 'setBet', symbol: 1, amount: 10 })).toThrow(IllegalActionError);
     expect(() => step(s, 1, { type: 'roll' })).toThrow(IllegalActionError); // only the banker rolls
   });
 
   it('the banker can close betting early', () => {
     let s = mk(3);
-    s = step(s, 1, { type: 'bet', symbol: 0, amount: 100 });
+    s = step(s, 1, { type: 'setBet', symbol: 0, amount: 100 });
     expect(langurBurja.legalActions(s, 0).map((a) => a.type)).toEqual(['close']);
     s = step(s, 0, { type: 'close' });
     expect(s.phase).toBe('rolling');
-    expect(() => step(s, 2, { type: 'bet', symbol: 0, amount: 10 })).toThrow(IllegalActionError);
+    expect(() => step(s, 2, { type: 'setBet', symbol: 0, amount: 10 })).toThrow(IllegalActionError);
   });
 
   it('rolling settles chips, conserves the total, and the next round starts clean', () => {
     let s = mk(3);
-    s = step(s, 1, { type: 'bet', symbol: 0, amount: 100 });
-    s = step(s, 1, { type: 'bet', symbol: 3, amount: 50 });
+    s = step(s, 1, { type: 'setBet', symbol: 0, amount: 100 });
+    s = step(s, 1, { type: 'setBet', symbol: 3, amount: 50 });
     s = step(s, 0, { type: 'close' });
     const before = s.chips.reduce((a, b) => a + b, 0);
     s = step(s, 0, { type: 'roll' });
@@ -99,7 +120,7 @@ describe('a round', () => {
 
   it('the roll is not in the state before betting closes (views never carry dice early)', () => {
     let s = mk(3);
-    s = step(s, 1, { type: 'bet', symbol: 0, amount: 100 });
+    s = step(s, 1, { type: 'setBet', symbol: 0, amount: 100 });
     expect(langurBurja.view(s, 1).dice).toBeNull();
     s = step(s, 0, { type: 'close' });
     expect(langurBurja.view(s, 2).dice).toBeNull();

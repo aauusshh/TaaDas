@@ -1,8 +1,12 @@
 import { useCallback, useLayoutEffect, useState } from 'react';
 import { IllegalActionError } from '../../../engine/core/types';
-import type { LBAction, LBView } from '../../../engine/games/langurburja';
-import { CHIP_VALUES } from '../../../engine/games/langurburja/config';
-import { useT } from '../../../i18n/t';
+import {
+  returnsFor,
+  stakeProblem,
+  type LBAction,
+  type LBView,
+} from '../../../engine/games/langurburja';
+import { translate, useT } from '../../../i18n/t';
 import { dur, wait } from '../../anim/queue';
 import { useAnimatedView, type RunArgs } from '../../anim/useAnimatedView';
 import { useViewport } from '../../anim/useViewport';
@@ -13,7 +17,7 @@ import { useToast } from '../../components/Overlays';
 import { ResultPanel } from '../../table/ResultPanel';
 import { Seat } from '../../table/Seat';
 import { TableShell } from '../../table/TableShell';
-import { DENOMS } from '../../table/ChipStack';
+import { StakeField } from '../../components/StakeField';
 import type { TableProps } from '../types';
 import { Bowl, type BowlState } from './Bowl';
 import { Die3D } from './Dice';
@@ -47,19 +51,6 @@ interface Ui {
 }
 const FRESH: Ui = { bowl: 'covered', dice: null, pulse: [], nets: null };
 
-function ChipDisc({ value, small }: { value: number; small?: boolean }) {
-  const d = DENOMS.find((x) => x.v === value) ?? DENOMS[4];
-  return (
-    <span
-      className={s.disc}
-      data-small={small}
-      style={{ background: `repeating-conic-gradient(${d.edge} 0 14deg, ${d.color} 14deg 45deg)` }}
-    >
-      <i style={{ background: d.color }} />
-    </span>
-  );
-}
-
 export default function LangurTable({
   session,
   mySeat,
@@ -74,13 +65,13 @@ export default function LangurTable({
   const toast = useToast();
   const n = players.length;
   const [ui, setUi] = useState<Ui>(FRESH);
-  const [chip, setChip] = useState<number>(50);
+  const [pick, setPick] = useState(0);
   const [active, setActive] = useState(mySeat);
 
   const run = useCallback(async ({ events }: RunArgs<LBView>) => {
     for (const e of events) {
       if (e.type === 'roundStart') setUi(FRESH);
-      else if (e.type === 'bet' || e.type === 'unbet') sound.play('chip');
+      else if (e.type === 'bet') sound.play('chip');
       else if (e.type === 'ready' || e.type === 'close') sound.play('tap');
       else if (e.type === 'roll') {
         const d = e.data as { dice: number[]; counts: number[] };
@@ -142,27 +133,24 @@ export default function LangurTable({
     !view!.ready[seat] &&
     (shared ? !players[seat].isBot : seat === mySeat);
 
-  const tapSquare = (sym: number) => {
+  const total = myBets.reduce((a, b) => a + b, 0);
+  const setStake = (sym: number, amount: number) => {
     if (!view || !canActFor(betSeat)) return;
-    const amount = CHIP_VALUES.includes(chip as never) ? chip : 10;
-    const ok = shared
-      ? legalFor(betSeat).some((a) => a.type === 'bet' && a.symbol === sym && a.amount === amount)
-      : view.amounts.includes(amount) && myBets[sym] + amount <= view.config.maxBet;
-    if (!ok) {
-      haptic(20);
-      toast.show(left < amount ? t('lb.noChips') : t('lb.maxReached', { n: view.config.maxBet }));
-      return;
-    }
-    submit(betSeat, { type: 'bet', symbol: sym, amount });
+    submit(betSeat, { type: 'setBet', symbol: sym, amount });
   };
-  const removeFrom = (sym: number) => {
-    if (!view || !canActFor(betSeat)) return;
-    const stake = myBets[sym];
-    const amount =
-      [...CHIP_VALUES].reverse().find((v) => v <= Math.min(stake, chip)) ??
-      [...CHIP_VALUES].reverse().find((v) => v <= stake);
-    if (amount) submit(betSeat, { type: 'unbet', symbol: sym, amount });
+  /** the reason a stake cannot be set, in words, or null */
+  const checkStake = (sym: number) => (n: number) => {
+    if (!view) return null;
+    const why = stakeProblem(view, betSeat, sym, n);
+    if (!why) return null;
+    const { step, minBet, maxBet } = view.config;
+    if (why === 'whole') return t('lb.err.whole');
+    if (why === 'step') return t('lb.err.step', { n: step });
+    if (why === 'min') return t('lb.err.min', { n: minBet });
+    if (why === 'max') return t('lb.err.max', { n: maxBet });
+    return t('lb.err.chips', { n: myChips.toLocaleString('en-US') });
   };
+  const symLabel = (sym: number) => t(`lb.sym.${SYMBOL_NAMES[sym]}`);
 
   const result = view?.phase === 'over' ? session.result() : null;
   const nameOf = (i: number) => players[i]?.name ?? '';
@@ -262,6 +250,26 @@ export default function LangurTable({
                 )
               }
             >
+              {view.counts && !isBanker && (
+                <ul className={s.outcomes}>
+                  {view.bets[betSeat].map((stake, sym) => {
+                    if (stake <= 0) return null;
+                    const c = view.counts![sym];
+                    const m = returnsFor(c, view.config);
+                    const text =
+                      c === 0
+                        ? t('lb.result.zero', { sym: symLabel(sym) })
+                        : m === 0
+                          ? t('lb.result.one', { sym: symLabel(sym) })
+                          : t('lb.result.pays', { sym: symLabel(sym), c, m });
+                    return (
+                      <li key={sym} data-lost={m === 0}>
+                        {text} <b className="num">{fmt(stake * (m - 1))}</b>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
               <div className={s.standings}>
                 {players.map((p, i) => (
                   <div key={i} className={s.stand}>
@@ -323,7 +331,7 @@ export default function LangurTable({
 
         <div className={s.stage}>
           <div className={s.bowlArea}>
-            <Bowl state={ui.bowl} size={vp.landscape ? 92 : 108} />
+            <Bowl state={ui.bowl} size={vp.landscape ? 92 : 84} />
             <div className={s.dice} data-hidden={ui.dice === null} aria-live="polite">
               {Array.from({ length: 6 }, (_, i) => (
                 <Die3D
@@ -338,7 +346,6 @@ export default function LangurTable({
 
           <div className={s.mat}>
             {SYMBOL_NAMES.map((name, sym) => {
-              const total = view ? view.bets.reduce((a, row) => a + row[sym], 0) : 0;
               const pulse = ui.pulse.includes(sym);
               const count = view?.counts?.[sym] ?? 0;
               return (
@@ -346,17 +353,21 @@ export default function LangurTable({
                   key={name}
                   className={s.square}
                   data-pulse={pulse}
+                  data-picked={tray && pick === sym}
                   data-dim={ui.dice !== null && !pulse}
                 >
                   <button
                     type="button"
                     className={s.squareBtn}
-                    onClick={() => tapSquare(sym)}
-                    aria-label={t(`lb.sym.${name}`)}
+                    onClick={() => setPick(sym)}
+                    aria-label={symLabel(sym)}
                     disabled={!canActFor(betSeat)}
                   >
-                    <LBSymbol idx={sym} size={vp.landscape ? 36 : 46} />
-                    <span className={s.symName}>{t(`lb.sym.${name}`)}</span>
+                    <LBSymbol idx={sym} size={vp.landscape ? 36 : 38} />
+                    <span className={s.symName} lang="ne">
+                      {translate('ne', `lb.sym.${name}`)}
+                      <small lang="en">{t(`lb.symLatin.${name}`)}</small>
+                    </span>
                   </button>
                   <div className={s.stakes}>
                     {view &&
@@ -372,16 +383,6 @@ export default function LangurTable({
                           </span>
                         ) : null,
                       )}
-                    {total > 0 && myBets[sym] > 0 && canActFor(betSeat) && (
-                      <button
-                        type="button"
-                        className={s.minus}
-                        aria-label={t('lb.takeBack')}
-                        onClick={() => removeFrom(sym)}
-                      >
-                        &minus;
-                      </button>
-                    )}
                   </div>
                   {ui.dice && count > 0 && <span className={`${s.count} num`}>{count}</span>}
                 </div>
@@ -442,26 +443,22 @@ export default function LangurTable({
 
           {tray && (
             <div className={s.tray}>
-              <div className={s.chips} role="radiogroup" aria-label={t('lb.chipValue')}>
-                {CHIP_VALUES.map((v) => (
-                  <button
-                    key={v}
-                    type="button"
-                    role="radio"
-                    aria-checked={chip === v}
-                    data-on={chip === v}
-                    className={`${s.chipBtn} num`}
-                    disabled={v > left || !canActFor(betSeat)}
-                    onClick={() => setChip(v)}
-                  >
-                    <ChipDisc value={v} />
-                    <span>{v}</span>
-                  </button>
-                ))}
+              <StakeField
+                label={t('lb.stakeFor', { sym: symLabel(pick) })}
+                value={myBets[pick]}
+                step={view!.config.step}
+                min={view!.config.minBet}
+                max={Math.min(view!.config.maxBet, left + myBets[pick])}
+                check={checkStake(pick)}
+                disabled={!canActFor(betSeat)}
+                onChange={(n) => setStake(pick, n)}
+              />
+              <div className={s.totalRow}>
+                <span className="num">{t('lb.total', { n: total.toLocaleString('en-US') })}</span>
+                <span className="num">
+                  {t('lb.chipsLeft', { n: left.toLocaleString('en-US') })}
+                </span>
               </div>
-              <span className={`${s.left} num`}>
-                {t('lb.left', { n: left.toLocaleString('en-US') })}
-              </span>
               {view?.canReady || (shared && legalFor(betSeat).some((a) => a.type === 'ready')) ? (
                 <Button
                   tone="primary"

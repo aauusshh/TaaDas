@@ -1,3 +1,4 @@
+import { GameName } from '../ui/components/GameName';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useT } from '../i18n/t';
@@ -89,7 +90,9 @@ export function ProfileScreen() {
             <tbody>
               {played.map((g) => (
                 <tr key={g}>
-                  <td>{t(`game.${g}`)}</td>
+                  <td>
+                    <GameName id={g} />
+                  </td>
                   <td className="num">{stats.all[g]!.played}</td>
                   <td className="num">{stats.all[g]!.wins}</td>
                 </tr>
