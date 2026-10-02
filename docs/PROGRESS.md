@@ -1,7 +1,34 @@
+# FINAL SUMMARY (overnight run)
+
+## Finished
+Phases 0-12 are all built on branch `dev`, committed locally. Nothing was pushed or merged.
+- Nine games: Call Break, Marriage, Teen Patti, Dhumbal, Jut Patti, Kitti, In Between, Rangi, Langur Burja.
+- Three modes: bots, same device (cover screen), online rooms (PeerJS, host is the source of truth).
+- English and Nepali, four themes, PWA with offline play, About / Terms / Privacy, ad slot hook (off).
+- Gate on the last commit: lint, typecheck, 196 tests and build all pass. Sims ran for every game.
+- Lighthouse mobile: 92 performance, 100 accessibility, 100 best practices, 91 SEO.
+
+## Skipped or weak
+- Real sound files: not downloaded (no network assets). A synthesized fallback plays instead.
+- Online play was tested with two headless browsers through the PeerJS cloud, not on real phones or across carriers.
+- Home in landscape (740x360) scrolls vertically, so the About/Terms/Privacy links sit below the fold. Acceptable, not polished.
+- Nepali text and all game rules are my drafts. The family-rule choices are in "Questions for owner" below.
+
+## Morning steps
+1. Review: `git log --oneline dev`, then `git push origin dev`.
+2. Merge `dev` into `main` when happy.
+3. GitHub: Settings, Pages, Source: GitHub Actions (free accounts need a public repo).
+4. Check `VITE_SITE_URL` in .github/workflows/deploy.yml. It is guessed as https://aauusshh.github.io/TaaDas.
+5. Sounds: put CC0 mp3 files in public/sounds named shuffle, deal, place, slide, flip, chip, chips, rattle, bowl, tick, win, tap.
+6. Read src/i18n/ne.json and fix anything unnatural.
+7. Optional TURN relay: repository secrets VITE_TURN_URLS, VITE_TURN_USERNAME, VITE_TURN_CREDENTIAL.
+8. Go through docs/QA.md on real phones with friends on different networks.
+9. Answer the items under "Questions for owner" below.
+
 # Progress
 
 ## Current phase
-Phase 12 — Launch (Phase 11 done)
+All phases done (Phase 12 Launch complete). Next: owner review, see FINAL SUMMARY above.
 
 ## Branch
 dev
@@ -116,3 +143,5 @@ Answer under each question. Claude uses the default until answered.
 - In Between: when the pot runs dry everyone antes again; players under the ante sit out. OK?
 - Marriage: rounds with no finisher end after 70 turns per player (maal settles for seen players only). OK, or should the round never end?
 - Marriage: a marriage scores as soon as you hold one jhiplu, one tiplu and one poplu together, even if not in one sequence. Confirm?
+
+- Phase 12: About, Terms and Privacy pages (en/ne), ad slot hook (off), guardrail tests (no the other card game's name, no payment code, pure engine, chips note on every table), docs/QA.md, launch screenshots script e2e/launch.mjs, final summary at the top.

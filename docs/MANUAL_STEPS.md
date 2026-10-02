@@ -16,7 +16,7 @@
 - Test on real phones: a cheap Android, an iPhone if possible, portrait and landscape.
 
 ## Before sharing publicly
-- Read the About, Terms, and Privacy pages.
+- Read the About, Terms, and Privacy pages (src/i18n/en.json, ne.json: keys info.*).
 - Go through docs/QA.md on real phones with friends.
 - Merge `dev` into `main` (or ask Claude to) so it deploys.
 - Ads later: apply only after the site has real players, and keep the "chips have no money value" text visible.
